@@ -58,15 +58,15 @@ class StaffDrawer extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ListTile(
-                leading: const Icon(Icons.person),
-                title: const Text("Profile"),
+                leading: const Icon(Icons.calendar_month),
+                title: const Text("Appointments"),
                 onTap: () =>
                     handleTileTap(0), // Pass index 0 when Profile is tapped
               ),
               const SizedBox(height: 20),
               ListTile(
-                leading: const Icon(Icons.calendar_month),
-                title: const Text("Appointments"),
+                leading: const Icon(Icons.settings),
+                title: const Text("Settings"),
                 onTap: () =>
                     handleTileTap(1), // Pass index 0 when Profile is tapped
               ),
@@ -74,6 +74,11 @@ class StaffDrawer extends StatelessWidget {
               const Divider(
                 height: 10,
                 color: Colors.white,
+              ),
+              Image.asset(
+                "/lagunalogo.png",
+                width: 250,
+                height: 250,
               )
             ],
           );

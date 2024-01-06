@@ -27,6 +27,11 @@ class _AuthenticateState extends State<Authenticate> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+          title: Text(
+        "Authenticate",
+        style: TextStyle(color: Colors.white70),
+      )),
       body: Center(
         child: SingleChildScrollView(
           child: Padding(

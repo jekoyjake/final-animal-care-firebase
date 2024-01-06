@@ -6,12 +6,17 @@ class PatientService {
       FirebaseFirestore.instance.collection('patients');
 
   // Create a new patient record
-  Future<void> addPatient(PatientModel patient) async {
+  Future<void> addPatient(
+      String userUid, String petUid, DateTime appointmentDate) async {
+    var uidd = _patientsCollection.doc().id;
+
+    PatientModel patient = PatientModel(
+        uId: uidd,
+        userUid: userUid,
+        petUid: petUid,
+        appointmentDate: appointmentDate);
     await _patientsCollection.add({
       'userUid': patient.userUid,
-      'address': patient.address,
-      'contactNo': patient.contactNo,
-      'appointmentReason': patient.appointmentReason,
       'petUid': patient.petUid,
       'appointmentDate': patient.appointmentDate,
     });
@@ -25,9 +30,6 @@ class PatientService {
         return PatientModel(
           uId: doc.id,
           userUid: data['userUid'],
-          address: data['address'],
-          contactNo: data['contactNo'],
-          appointmentReason: data['appointmentReason'],
           petUid: data['petUid'],
           appointmentDate: (data['appointmentDate'] as Timestamp).toDate(),
         );
@@ -43,9 +45,6 @@ class PatientService {
       return PatientModel(
         uId: snapshot.id,
         userUid: data['userUid'],
-        address: data['address'],
-        contactNo: data['contactNo'],
-        appointmentReason: data['appointmentReason'],
         petUid: data['petUid'],
         appointmentDate: (data['appointmentDate'] as Timestamp).toDate(),
       );
@@ -58,9 +57,6 @@ class PatientService {
   Future<void> updatePatient(PatientModel updatedPatient) async {
     await _patientsCollection.doc(updatedPatient.uId).update({
       'userUid': updatedPatient.userUid,
-      'address': updatedPatient.address,
-      'contactNo': updatedPatient.contactNo,
-      'appointmentReason': updatedPatient.appointmentReason,
       'petUid': updatedPatient.petUid,
       'appointmentDate': updatedPatient.appointmentDate,
     });

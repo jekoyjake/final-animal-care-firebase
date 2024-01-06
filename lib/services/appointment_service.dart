@@ -60,9 +60,9 @@ class AppointmentService {
   }
 
   // Delete an existing appointment
-  Future<void> deleteAppointment(String userUid) async {
+  Future<void> deleteAppointment(String appointmentId) async {
     try {
-      await appointmentsCollection.doc(userUid).delete();
+      await appointmentsCollection.doc(appointmentId).delete();
     } catch (e) {
       print('Error deleting appointment: $e');
     }
@@ -91,6 +91,7 @@ class AppointmentService {
   }
 
   Stream<List<AppointmentModel>> getAppointmentsByStatus(String status) {
+    print(status);
     return appointmentsCollection
         .where('status', isEqualTo: status)
         .snapshots()
@@ -107,5 +108,16 @@ class AppointmentService {
         );
       }).toList();
     });
+  }
+
+  Future<void> changeStatusByAppointmentId(
+      String appointmentId, String newStatus) async {
+    try {
+      await appointmentsCollection.doc(appointmentId).update({
+        'status': newStatus,
+      });
+    } catch (e) {
+      print('Error changing appointment status: $e');
+    }
   }
 }

@@ -26,14 +26,21 @@ class CustomTextField extends StatelessWidget {
       onChanged: onChanged,
       validator: validator,
       obscureText: obscureText,
-      style: TextStyle(color: textColor), // Set text color
+      style: TextStyle(color: textColor),
+      // Set text color
 
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: textColor), // Set label text color
         filled: true,
         fillColor: fillColor, // Set background color
-        border: const OutlineInputBorder(),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10.0),
+          borderSide: const BorderSide(
+            color: Colors.blue, // Adjust the color as needed
+            width: 2.0, // Adjust the width as needed
+          ),
+        ),
       ),
     );
   }

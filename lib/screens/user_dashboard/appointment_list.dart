@@ -17,7 +17,16 @@ class AppointmentListForUser extends StatelessWidget {
       stream: appointmentService.getAllMyAppointments(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(height: 50, width: 50, child: Text("Hahaha"));
+          return Container(
+              height: 50,
+              width: 50,
+              child: const Center(
+                child: SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: CircularProgressIndicator(),
+                ),
+              ));
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -83,7 +92,16 @@ class AppointmentListForUser extends StatelessWidget {
             ),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(height: 50, width: 50, child: Text("Hahaha"));
+                return Container(
+                    height: 50,
+                    width: 50,
+                    child: const Center(
+                      child: SizedBox(
+                        height: 100,
+                        width: 100,
+                        child: CircularProgressIndicator(),
+                      ),
+                    ));
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {

@@ -14,10 +14,19 @@ class AppointmentListHistoryForUser extends StatelessWidget {
     final AuthService authService = AuthService();
 
     return StreamBuilder<List<AppointmentModel>>(
-      stream: appointmentService.getAppointmentsByStatus("Approved"),
+      stream: appointmentService.getAppointmentsByStatus('Accepted'),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(height: 50, width: 50, child: Text("Hahaha"));
+          return Container(
+              height: 50,
+              width: 50,
+              child: const Center(
+                child: SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: CircularProgressIndicator(),
+                ),
+              ));
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -59,13 +68,40 @@ class AppointmentListHistoryForUser extends StatelessWidget {
                                         color: Colors.white),
                                   )
                                 : Text(appointment.status!)),
+                    DataCell(
+                      ElevatedButton(
+                        onPressed: () {
+                          // Add logic to handle the "View" button click
+                          // For now, print a message to the console
+                          print(
+                              'View button clicked for appointment ${appointment.uid}');
+                        },
+                        child: Text(
+                          'View',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          primary:
+                              Colors.green, // Set the button color to green
+                        ),
+                      ),
+                    ),
                   ],
                 );
               }).toList(),
             ),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Container(height: 50, width: 50, child: Text("Hahaha"));
+                return Container(
+                    height: 50,
+                    width: 50,
+                    child: const Center(
+                      child: SizedBox(
+                        height: 100,
+                        width: 100,
+                        child: CircularProgressIndicator(),
+                      ),
+                    ));
               } else if (snapshot.hasError) {
                 return Text('Error: ${snapshot.error}');
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -88,6 +124,12 @@ class AppointmentListHistoryForUser extends StatelessWidget {
                       'Status',
                       style: TextStyle(fontSize: 20),
                     )),
+                    DataColumn(
+                      label: Text(
+                        'Options',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
                   ],
                   rows: snapshot.data!,
                 );

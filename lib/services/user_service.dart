@@ -15,9 +15,9 @@ class UserService {
 
   final ChatService chatService = ChatService();
 
-  Future<Map<String, String>> getUserById(String userId) async {
+  Future<String> getUserById() async {
     try {
-      DocumentSnapshot userSnapshot = await userCollection.doc(userId).get();
+      DocumentSnapshot userSnapshot = await userCollection.doc(uid).get();
 
       if (userSnapshot.exists) {
         Map<String, dynamic> userData =
@@ -26,15 +26,9 @@ class UserService {
         String firstName = userData['firstname'] ?? '';
         String lastName = userData['lastname'] ?? '';
 
-        return {
-          'firstName': firstName,
-          'lastName': lastName,
-        };
+        return "$firstName $lastName";
       } else {
-        return {
-          'firstName': '',
-          'lastName': '',
-        };
+        return "";
       }
     } catch (e) {
       print('Error getting user by ID: $e');

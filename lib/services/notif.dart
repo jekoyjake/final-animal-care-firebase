@@ -13,9 +13,7 @@ class NotificationService {
       posterUid: fromId,
       isAppoinment: true,
       isAnnouncment: false,
-      isDoctorAvailable: false,
       read: false,
-      isMessage: false,
       forUserUid: userId,
       notifMsg: msg,
     );
@@ -37,5 +35,17 @@ class NotificationService {
       print('Error adding notification: $error');
       return null;
     }
+  }
+
+  Stream<List<NotificationModel>> getMyNotifStream(String userId) {
+    return _collectionReference
+        .where('forUserUid', isEqualTo: userId)
+        .snapshots()
+        .map((QuerySnapshot querySnapshot) {
+      return querySnapshot.docs
+          .map((doc) =>
+              NotificationModel.fromMap(doc.data() as Map<String, dynamic>))
+          .toList();
+    });
   }
 }
