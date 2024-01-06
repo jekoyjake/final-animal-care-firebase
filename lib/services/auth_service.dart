@@ -65,6 +65,26 @@ class AuthService {
     });
   }
 
+  Future<String> getUserByUid(String uid) async {
+    try {
+      DocumentSnapshot userSnapshot = await userCollection.doc(uid).get();
+
+      if (userSnapshot.exists) {
+        String firstname = userSnapshot['firstname'];
+
+        String lastname = userSnapshot['lastname'];
+
+        return "${firstname} ${firstname} "; // or return any other data you need
+      } else {
+        // User with the provided UID not found
+        return "User";
+      }
+    } catch (e) {
+      print("Error getting user by UID: $e");
+      return e.toString();
+    }
+  }
+
   String? get uid {
     User? user = _auth.currentUser;
     return user?.uid;

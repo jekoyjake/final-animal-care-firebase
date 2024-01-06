@@ -34,6 +34,24 @@ class PetService {
     }
   }
 
+  Future<String> getPetNameByUid(String petUid) async {
+    try {
+      DocumentSnapshot documentSnapshot = await petCollection.doc(petUid).get();
+
+      if (documentSnapshot.exists) {
+        String petName = documentSnapshot['name'];
+        return petName;
+      } else {
+        // Handle the case where the document with the given UID does not exist
+        return "Pet Name";
+      }
+    } catch (e) {
+      // Handle any errors that occurred during the data retrieval process
+      print("Error getting pet name by UID: $e");
+      return e.toString();
+    }
+  }
+
   Future<PetModel> addPet({
     required String name,
     required String species,
@@ -124,26 +142,6 @@ class PetService {
     } catch (e) {
       // Handle errors
       print('Error getting pets for user: $e');
-      rethrow; // Rethrow the exception for higher-level handling
-    }
-  }
-
-  Future<String> getPetNameByUid(String petUid) async {
-    try {
-      // Fetch the document for the specified pet UID
-      DocumentSnapshot docSnapshot = await petCollection.doc(petUid).get();
-
-      if (docSnapshot.exists) {
-        // If the document exists, extract the pet name and return it
-        String petName = docSnapshot.get('name') ?? '';
-        return petName;
-      } else {
-        // If the document does not exist, return an empty string
-        return '';
-      }
-    } catch (e) {
-      // Handle errors
-      print('Error getting pet name by UID: $e');
       rethrow; // Rethrow the exception for higher-level handling
     }
   }

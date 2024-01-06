@@ -139,39 +139,37 @@ class _WalkInPatientState extends State<WalkInPatient> {
                 } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const Text('No appointments found');
                 } else {
-                  return SingleChildScrollView(
-                    child: DataTable(
-                      columns: const [
-                        DataColumn(
-                            label: Text(
-                          'Owner Name',
-                          style: TextStyle(fontSize: 20),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Pet Name',
-                          style: TextStyle(fontSize: 20),
-                        )),
-                        DataColumn(
-                            label: Text(
-                          'Pet Type',
-                          style: TextStyle(fontSize: 20),
-                        )),
-                        DataColumn(
+                  return DataTable(
+                    columns: const [
+                      DataColumn(
                           label: Text(
-                            'Appointment Date',
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ),
-                        DataColumn(
+                        'Owner Name',
+                        style: TextStyle(fontSize: 20),
+                      )),
+                      DataColumn(
                           label: Text(
-                            'Options',
-                            style: TextStyle(fontSize: 20),
-                          ),
+                        'Pet Name',
+                        style: TextStyle(fontSize: 20),
+                      )),
+                      DataColumn(
+                          label: Text(
+                        'Pet Type',
+                        style: TextStyle(fontSize: 20),
+                      )),
+                      DataColumn(
+                        label: Text(
+                          'Appointment Date',
+                          style: TextStyle(fontSize: 20),
                         ),
-                      ],
-                      rows: snapshot.data!,
-                    ),
+                      ),
+                      DataColumn(
+                        label: Text(
+                          'Options',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ),
+                    ],
+                    rows: snapshot.data!,
                   );
                 }
               },
