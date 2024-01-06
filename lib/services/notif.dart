@@ -25,12 +25,18 @@ class NotificationService {
       // Retrieve the added document from Firestore
       final DocumentSnapshot snapshot = await docRef.get();
 
-      // Create a NotificationModel from the retrieved data
-      final NotificationModel addedNotification =
-          NotificationModel.fromMap(snapshot.data() as Map<String, dynamic>);
+      // Check if the data retrieved from Firestore is not null
+      if (snapshot.data() != null) {
+        // Create a NotificationModel from the retrieved data
+        final NotificationModel addedNotification =
+            NotificationModel.fromMap(snapshot.data()! as Map<String, dynamic>);
 
-      // Return the added NotificationModel
-      return addedNotification;
+        // Return the added NotificationModel
+        return addedNotification;
+      } else {
+        print('Error adding notification: Document data is null');
+        return null;
+      }
     } catch (error) {
       print('Error adding notification: $error');
       return null;
@@ -43,8 +49,31 @@ class NotificationService {
         .snapshots()
         .map((QuerySnapshot querySnapshot) {
       return querySnapshot.docs
-          .map((doc) =>
-              NotificationModel.fromMap(doc.data() as Map<String, dynamic>))
+          .map((doc) {
+            // Use null-aware operator to check for null before creating NotificationModel
+            Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+            return data != null ? NotificationModel.fromMap(data) : null;
+          })
+          // Use where to filter out null values
+          .whereType<NotificationModel>() // Filter out null values
+          .toList();
+    });
+  }
+
+  Stream<List<NotificationModel>> getNotifForAppointment() {
+    return _collectionReference
+        .where('isAppoinment', isEqualTo: true)
+        .where('forUserUid', isEqualTo: 'userId')
+        .snapshots()
+        .map((QuerySnapshot querySnapshot) {
+      return querySnapshot.docs
+          .map((doc) {
+            // Use null-aware operator to check for null before creating NotificationModel
+            Map<String, dynamic>? data = doc.data() as Map<String, dynamic>?;
+            return data != null ? NotificationModel.fromMap(data) : null;
+          })
+          // Use where to filter out null values
+          .whereType<NotificationModel>() // Filter out null values
           .toList();
     });
   }

@@ -1,5 +1,7 @@
 import 'package:animalcare/models/appointment.dart';
 import 'package:animalcare/models/notification.dart';
+import 'package:animalcare/screens/staff_dashboard/walk_patient.dart';
+
 import 'package:animalcare/services/appointment_service.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/notif.dart';
@@ -28,45 +30,47 @@ class _AppointmentStaffState extends State<AppointmentStaff> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Notifications'),
-          content: StreamBuilder<List<NotificationModel>>(
-            stream: notificationService.getMyNotifStream(_authService.uid!),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                // Loading indicator
-                return CircularProgressIndicator();
-              }
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                StreamBuilder<List<NotificationModel>>(
+                  stream: notificationService.getNotifForAppointment(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    }
 
-              if (snapshot.hasError) {
-                // Error handling
-                return Text('Error: ${snapshot.error}');
-              }
-              if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Text("No notification found");
-              }
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
 
-              final List<NotificationModel> notifications = snapshot.data ?? [];
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Text("No notification found");
+                    }
 
-              // Your UI code here using the 'notifications' list
-              return ListView.builder(
-                itemCount: notifications.length,
-                itemBuilder: (context, index) {
-                  final NotificationModel notification = notifications[index];
-                  return ListTile(
-                    title: Text(notification.notifMsg),
-                    // Additional details or actions can be displayed here
-                  );
-                },
-              );
-            },
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('Close'),
+                    final List<NotificationModel> notifications =
+                        snapshot.data ?? [];
+
+                    return Column(
+                      children: notifications.map((notification) {
+                        return ListTile(
+                          title: Text(notification.notifMsg),
+                          // Additional details or actions can be displayed here
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+                SizedBox(height: 16), // Adjust as needed
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Close'),
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -161,7 +165,11 @@ class _AppointmentStaffState extends State<AppointmentStaff> {
         icon: Icon(Icons.add),
         label: Text("Manual Add Appointment"),
         onPressed: () {
-          // Your onPressed logic here
+          // Navigate to ManualAppointment widget
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => WalkInForm()),
+          );
         },
       ),
       appBar: AppBar(

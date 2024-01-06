@@ -1,9 +1,8 @@
 class NotificationModel {
   String? posterUid;
-  bool isAppoinment = false;
-  bool isAnnouncment = false;
-
-  bool read = false;
+  bool isAppoinment;
+  bool isAnnouncment;
+  bool read;
   String? forUserUid;
   String notifMsg;
 
@@ -18,8 +17,8 @@ class NotificationModel {
   Map<String, dynamic> toMap() {
     return {
       'posterUid': posterUid,
-      'isAppointment': isAppoinment,
-      'isAnnouncement': isAnnouncment,
+      'isAppoinment': isAppoinment,
+      'isAnnouncment': isAnnouncment,
       'read': read,
       'forUserUid': forUserUid,
       'notifMsg': notifMsg

@@ -3,6 +3,7 @@ import 'package:animalcare/reusable_widget/settings.dart';
 import 'package:animalcare/screens/doctor_dashboard/appointmentfordoc.dart';
 import 'package:animalcare/screens/doctor_dashboard/list_user.dart';
 import 'package:animalcare/screens/doctor_dashboard/patient.dart';
+import 'package:animalcare/screens/doctor_dashboard/wakib_patient.dart';
 import 'package:flutter/material.dart';
 
 class DoctorDashboard extends StatefulWidget {
@@ -22,7 +23,7 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
       case 1:
         return const PatientDashboardDoctor();
       case 2:
-        return const AppointmentDashboardDoctor();
+        return const WalkInPatient();
       case 3:
         return const Settings();
       default:

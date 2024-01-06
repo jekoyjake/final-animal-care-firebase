@@ -13,7 +13,7 @@ class ListOfUserConvo extends StatelessWidget {
     final AuthService authService = AuthService();
     return Scaffold(
       appBar: AppBar(
-        title: Text('List of Users'),
+        title: Text('Messages from users'),
       ),
       body: FutureBuilder<List<UserModel>>(
         // Replace 'userUid' with the actual user id

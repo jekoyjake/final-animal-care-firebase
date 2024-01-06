@@ -71,10 +71,10 @@ class DoctorDrawer extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ListTile(
-                leading: const Icon(Icons.person_2),
-                title: const Text("Appointment"),
+                leading: const Icon(Icons.pets_rounded),
+                title: const Text("Walk in patients"),
                 onTap: () =>
-                    handleTileTap(2), // Pass index 0 when Profile is tapped
+                    handleTileTap(2), // Pass index 1 when Pets is tapped
               ),
               const SizedBox(height: 20),
               ListTile(
@@ -87,6 +87,11 @@ class DoctorDrawer extends StatelessWidget {
               const Divider(
                 height: 10,
                 color: Colors.white,
+              ),
+              Image.asset(
+                "/lagunalogo.png",
+                width: 250,
+                height: 250,
               )
             ],
           );

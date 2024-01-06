@@ -3,6 +3,7 @@ import 'package:animalcare/models/pet.dart';
 import 'package:animalcare/models/user.dart';
 import 'package:animalcare/services/appointment_service.dart';
 import 'package:animalcare/services/auth_service.dart';
+import 'package:animalcare/services/notif.dart';
 import 'package:animalcare/services/pet_service.dart';
 import 'package:animalcare/services/user_service.dart';
 import 'package:flutter/material.dart';
@@ -252,42 +253,53 @@ class _AppointmentDashState extends State<AppointmentDash> {
                             const SizedBox(
                               height: 15,
                             ),
-                            ElevatedButton(
-                              onPressed: () async {
-                                var res = await appointmentService
-                                    .addAppointment(selectedDate!, petId!);
-                                if (res == "Appointment successfully added") {
-                                  setState(() {
-                                    sucmsg = res;
-                                  });
+                            isLoading
+                                ? CircularProgressIndicator()
+                                : ElevatedButton(
+                                    onPressed: () async {
+                                      NotificationService _noftifservice =
+                                          NotificationService();
+                                      var res = await appointmentService
+                                          .addAppointment(
+                                              selectedDate!, petId!);
+                                      if (res ==
+                                          "Appointment successfully added") {
+                                        setState(() {
+                                          sucmsg = res;
+                                        });
+                                        var msg =
+                                            "You have recieve appointment request from ${_authService.uid}";
+                                        await _noftifservice
+                                            .addAppointmentNotification(
+                                                _authService.uid!,
+                                                "userId",
+                                                msg);
+                                        // Clear form fields
+                                        petId = null;
+                                        selectedDate = null;
+                                        hasError = false;
 
-                                  // Clear form fields
-                                  petId = null;
-                                  selectedDate = null;
-                                  hasError = false;
+                                        // Reset state variables
+                                        setState(() {
+                                          _selectedDate = DateTime.now();
+                                        });
 
-                                  // Reset state variables
-                                  setState(() {
-                                    _selectedDate = DateTime.now();
-                                  });
-
-                                  // Navigate back to the previous screen
-                                  Navigator.pop(context);
-                                } else {
-                                  setState(() {
-                                    hasError = true;
-                                    errmsg = res;
-                                  });
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(0),
-                                ),
-                              ),
-                              child: Text('Submit'),
-                            ),
+                                        // Navigate back to the previous screen
+                                      } else {
+                                        setState(() {
+                                          hasError = true;
+                                          errmsg = res;
+                                        });
+                                      }
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.blue,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(0),
+                                      ),
+                                    ),
+                                    child: Text('Submit'),
+                                  ),
                             hasError ? Text(errmsg ?? "") : Text(sucmsg ?? "")
                           ],
                         );

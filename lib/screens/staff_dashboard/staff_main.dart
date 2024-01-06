@@ -21,7 +21,7 @@ class _StaffMainState extends State<StaffMain> {
         return AlertDialog(
           title: const Text('Notifications'),
           content: StreamBuilder<List<NotificationModel>>(
-            stream: notificationService.getMyNotifStream(_authService.uid!),
+            stream: notificationService.getNotifForAppointment(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 // Loading indicator

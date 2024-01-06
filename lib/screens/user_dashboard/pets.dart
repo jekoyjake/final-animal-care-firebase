@@ -1,5 +1,7 @@
+import 'package:animalcare/models/prescription.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/pet_service.dart';
+import 'package:animalcare/services/prescription_service.dart';
 import 'package:flutter/material.dart';
 import 'package:animalcare/models/pet.dart';
 import 'package:animalcare/screens/add_pet.dart';
@@ -171,6 +173,7 @@ class PetDash extends StatelessWidget {
 
 class PetDetailScreen extends StatelessWidget {
   final PetModel pet;
+  final PrescriptionService _prescriptionService = PrescriptionService();
 
   PetDetailScreen({Key? key, required this.pet}) : super(key: key);
 
@@ -181,26 +184,79 @@ class PetDetailScreen extends StatelessWidget {
         title: Text(pet.name),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.network(
-              pet.photoUrl,
-              fit: BoxFit.cover,
-              height: 200.0,
-            ),
-            SizedBox(height: 16.0),
-            Text(
-              "Species: ${pet.species}",
-              style: TextStyle(fontSize: 18.0),
-            ),
-            SizedBox(height: 8.0),
-            Text(
-              "Breed: ${pet.breed}",
-              style: TextStyle(fontSize: 18.0),
-            ),
-            // Add more details as needed
-          ],
+        child: Padding(
+          padding: EdgeInsets.all(30),
+          child: Row(
+            children: [
+              Container(
+                width: 400,
+                height: 650,
+                decoration:
+                    BoxDecoration(color: Colors.grey, border: Border.all()),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.network(
+                      pet.photoUrl,
+                      fit: BoxFit.cover,
+                      height: 200.0,
+                    ),
+                    SizedBox(height: 16.0),
+                    Text(
+                      "Species: ${pet.species}",
+                      style: TextStyle(fontSize: 18.0),
+                    ),
+                    SizedBox(height: 8.0),
+                    Text(
+                      "Breed: ${pet.breed}",
+                      style: TextStyle(fontSize: 18.0),
+                    ),
+                    // Add more details as needed
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: 30,
+              ),
+
+              // Prescription list using FutureBuilder
+              Expanded(
+                child: FutureBuilder<List<Prescription>>(
+                  future: _prescriptionService.getPrescriptionsForPet(pet.id),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Text("No prescriptions found");
+                    } else {
+                      List<Prescription> prescriptions = snapshot.data!;
+                      return Column(
+                        children: [
+                          Text(
+                            "Doctor's Prescriptions",
+                            style: TextStyle(fontSize: 30),
+                          ),
+                          Column(
+                            children: prescriptions.map((prescription) {
+                              return ListTile(
+                                title: Text(
+                                    "Medication: ${prescription.medicationName}"),
+                                subtitle: Text(
+                                    "Dosage: ${prescription.dosage}, Frequency: ${prescription.frequency}"),
+                                // Add more details or actions as needed
+                              );
+                            }).toList(),
+                          ),
+                        ],
+                      );
+                    }
+                  },
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

@@ -1,6 +1,8 @@
 import 'package:animalcare/models/message.dart';
+import 'package:animalcare/models/notification.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/chat_service.dart';
+import 'package:animalcare/services/notif.dart';
 import 'package:animalcare/services/user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +16,61 @@ class UserDash extends StatefulWidget {
 
 class _UserDashState extends State<UserDash> {
   final AuthService _authService = AuthService();
+  final NotificationService notificationService = NotificationService();
+  bool hasData = false;
+  void showNotifications(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Notifications'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: [
+                StreamBuilder<List<NotificationModel>>(
+                  stream:
+                      notificationService.getMyNotifStream(_authService.uid!),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    }
+
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+
+                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return Text("No notification found");
+                    }
+
+                    final List<NotificationModel> notifications =
+                        snapshot.data ?? [];
+
+                    return Column(
+                      children: notifications.map((notification) {
+                        return ListTile(
+                          title: Text(notification.notifMsg),
+                          // Additional details or actions can be displayed here
+                        );
+                      }).toList(),
+                    );
+                  },
+                ),
+                SizedBox(height: 16), // Adjust as needed
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('Close'),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,12 +101,31 @@ class _UserDashState extends State<UserDash> {
             ),
             onPressed: () {},
           ),
-          IconButton(
-            icon: const Icon(
+          PopupMenuButton(
+            icon: Icon(
               Icons.notifications,
               size: 50,
             ),
-            onPressed: () {},
+            itemBuilder: (BuildContext context) {
+              return <PopupMenuEntry>[
+                PopupMenuItem(
+                  child: ListTile(
+                    title: Row(
+                      children: [
+                        Text("Notification "),
+                        hasData ? Text("🔴") : Container()
+                      ],
+                    ),
+                    onTap: () {
+                      // Handle the 'Notifications' menu item tap
+                      // For example, show a modal sheet with notifications
+                      showNotifications(context);
+                    },
+                  ),
+                ),
+                // Add more menu items if needed
+              ];
+            },
           ),
           IconButton(
             icon: const Icon(

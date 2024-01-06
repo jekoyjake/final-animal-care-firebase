@@ -177,4 +177,20 @@ class AuthService {
       print('Error signing out: $e');
     }
   }
+
+  Future<String?> getUidByEmail(String email) async {
+    try {
+      QuerySnapshot querySnapshot =
+          await userCollection.where('email', isEqualTo: email).get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return querySnapshot.docs[0].id;
+      } else {
+        return null; // Email not found
+      }
+    } catch (e) {
+      print('Error getting UID by email: $e');
+      return null;
+    }
+  }
 }

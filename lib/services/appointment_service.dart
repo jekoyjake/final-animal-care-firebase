@@ -1,6 +1,12 @@
+import 'dart:math';
+import 'dart:typed_data';
+
 import 'package:animalcare/models/appointment.dart';
+import 'package:animalcare/screens/user_dashboard/pets.dart';
 import 'package:animalcare/services/auth_service.dart';
+import 'package:animalcare/services/pet_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AppointmentService {
   final CollectionReference appointmentsCollection =
@@ -12,6 +18,24 @@ class AppointmentService {
     try {
       DocumentReference appointmentRef = await appointmentsCollection.add({
         'userUid': _authService.uid,
+        'appointmentDate': dateTime,
+        'status': 'Pending',
+        'seen': false,
+        'petId': petId,
+      });
+
+      // Return the ID of the added appointment
+      return "Appointment successfully added";
+    } catch (e) {
+      return "Error adding appointment: $e";
+    }
+  }
+
+  Future<String> addManualAppointment(
+      DateTime dateTime, String uuid, String petId) async {
+    try {
+      await appointmentsCollection.add({
+        'userUid': uuid,
         'appointmentDate': dateTime,
         'status': 'Pending',
         'seen': false,
