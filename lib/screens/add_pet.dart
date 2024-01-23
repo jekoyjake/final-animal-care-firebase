@@ -17,7 +17,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _breedController = TextEditingController();
-  final AuthService _authService = AuthService();
+  AuthService _authService = AuthService();
   Uint8List? _imageBytes;
 
   // List of species options
@@ -26,29 +26,40 @@ class _AddPetScreenState extends State<AddPetScreen> {
   // Variable to store the selected species
   String? selectedSpecies;
   String sucmsg = "";
+  bool isLoading = false;
 
-  void _submit() {
+  void _submit() async {
     if (_formKey.currentState!.validate()) {
       // If form is valid, proceed with adding the pet
-      final String name = _nameController.text.trim();
-      final String species = selectedSpecies!;
-      final int age = int.parse(_ageController.text.trim());
-      final String breed = _breedController.text.trim();
+      String name = _nameController.text.trim();
+      String species = selectedSpecies!;
+      int age = int.parse(_ageController.text.trim());
+      String breed = _breedController.text.trim();
 
       // Call your service to add the pet here
       // For example: PetService().addPet(name, species, age, breed, _imageBytes);
 
       // Then navigate back to the previous screen
-      PetService(uid: _authService.uid!).addPet(
+      setState(() {
+        isLoading = true;
+      });
+
+      var res = await PetService(uid: _authService.uid!).addPet(
         name: name,
         species: species,
         age: age,
         breed: breed,
         photoFile: _imageBytes,
       );
+
       setState(() {
-        sucmsg = "Pet Successfully added";
+        isLoading = false;
+        sucmsg = "${res.name}  Successfully added";
       });
+
+      _nameController.clear();
+      _ageController.clear();
+      _breedController.clear();
     }
   }
 
@@ -261,12 +272,17 @@ class _AddPetScreenState extends State<AddPetScreen> {
               SizedBox(
                 height: 20,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  _submit();
-                },
-                child: const Text('Submit'),
-              ),
+              !isLoading
+                  ? ElevatedButton(
+                      onPressed: () {
+                        _submit();
+                      },
+                      child: const Text('Submit'),
+                    )
+                  : const SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: CircularProgressIndicator()),
               const SizedBox(
                 height: 20,
               ),
