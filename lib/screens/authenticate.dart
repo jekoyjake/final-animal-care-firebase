@@ -26,6 +26,7 @@ class _AuthenticateState extends State<Authenticate> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
     return Scaffold(
       appBar: AppBar(
           title: Text(
@@ -37,11 +38,13 @@ class _AuthenticateState extends State<Authenticate> {
           child: Padding(
             padding: EdgeInsets.all(40),
             child: Row(children: [
-              Expanded(
-                child: Stack(
-                  children: [Image.asset('/login.gif')],
-                ),
-              ),
+              !isMobile
+                  ? Expanded(
+                      child: Stack(
+                        children: [Image.asset('assets/login.gif')],
+                      ),
+                    )
+                  : Container(),
               Expanded(
                 child: Container(
                   decoration: const BoxDecoration(color: Color(0xFF6665FE)),
@@ -55,7 +58,7 @@ class _AuthenticateState extends State<Authenticate> {
                           Padding(
                             padding: const EdgeInsets.all(10),
                             child: Image.asset(
-                              '/logo.png',
+                              'assets/logo.png',
                               width: 150,
                             ),
                           ),

@@ -1,23 +1,21 @@
-import 'package:animalcare/models/patient.dart';
+import 'package:animalcare/models/walkin_patient.dart';
 import 'package:animalcare/screens/doctor_dashboard/add_prescription.dart';
 import 'package:animalcare/services/auth_service.dart';
-import 'package:animalcare/services/patient_service.dart';
 import 'package:animalcare/services/pet_service.dart';
-import 'package:animalcare/services/prescription_service.dart';
-import 'package:animalcare/services/user_service.dart';
+import 'package:animalcare/services/walkin.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class PatientDashboardDoctor extends StatefulWidget {
-  const PatientDashboardDoctor({super.key});
+class WalkInPatientList extends StatefulWidget {
+  const WalkInPatientList({Key? key}) : super(key: key);
 
   @override
-  State<PatientDashboardDoctor> createState() => _PatientDashboardDoctorState();
+  State<WalkInPatientList> createState() => _WalkInPatientListState();
 }
 
-class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
+class _WalkInPatientListState extends State<WalkInPatientList> {
   final AuthService _authService = AuthService();
-  final PatientService _patientService = PatientService();
+  final WalkinService walkinService = WalkinService();
 
   // Selected date for filtering
   String _selectedDate = '';
@@ -37,16 +35,16 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
     }
   }
 
-  List<DataRow> _buildDataRows(List<PatientModel> patients) {
-    List<PatientModel> filteredAppointments =
+  List<DataRow> _buildDataRows(List<WalkIn> patients) {
+    List<WalkIn> filteredAppointments =
         _filterAppointmentsByDate(patients, _selectedDate);
 
     return filteredAppointments.map((patient) {
       return DataRow(
         cells: [
           DataCell(
-            FutureBuilder<String>(
-              future: _authService.getUserByUid(patient.userUid),
+            FutureBuilder<WalkIn?>(
+              future: walkinService.getWalkInById(patient.uid),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
@@ -56,14 +54,17 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
                   return Text('Error: ${snapshot.error}');
                 }
 
-                return Text(snapshot.data ?? 'N/A');
+                // Use the fetched walk-in data as needed
+                WalkIn? walkInData = snapshot.data;
+                String ownerName = walkInData?.fullname ?? 'N/A';
+
+                return Text(ownerName);
               },
             ),
           ),
           DataCell(
-            FutureBuilder<String>(
-              future: PetService(uid: patient.userUid)
-                  .getPetNameByUid(patient.petUid),
+            FutureBuilder<WalkIn?>(
+              future: walkinService.getWalkInById(patient.uid),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
@@ -73,7 +74,11 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
                   return Text('Error: ${snapshot.error}');
                 }
 
-                return Text(snapshot.data ?? 'N/A');
+                // Use the fetched walk-in data as needed
+                WalkIn? walkInData = snapshot.data;
+                String petName = walkInData?.petname ?? 'N/A';
+
+                return Text(petName);
               },
             ),
           ),
@@ -85,31 +90,12 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
             Row(
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddPrescriptionWidget(
-                          petUid: patient.petUid,
-                        ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
-                  child: const Text(
-                    'Add Prescription',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                ElevatedButton(
                   onPressed: () async {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orangeAccent,
                   ),
                   child: const Text(
-                    'Make New Appointment',
+                    'View',
                     style: TextStyle(color: Colors.white),
                   ),
                 )
@@ -121,8 +107,8 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
     }).toList();
   }
 
-  List<PatientModel> _filterAppointmentsByDate(
-    List<PatientModel> appointments,
+  List<WalkIn> _filterAppointmentsByDate(
+    List<WalkIn> appointments,
     String selectedDate,
   ) {
     DateTime? selectedDateTime = _parseDate(selectedDate);
@@ -187,20 +173,20 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
                         primary: Colors
                             .redAccent, // Change this color to your desired background color
                       ),
-                      child: Text(
+                      child: const Text(
                         'FILTER BY APPOINTMENT DATE',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
-                    SizedBox(width: 16.0),
+                    const SizedBox(width: 16.0),
                     Text(_selectedDate.isNotEmpty
                         ? 'Selected Date: $_selectedDate'
                         : 'No date selected'),
                   ],
                 ),
               ),
-              StreamBuilder<List<PatientModel>>(
-                stream: _patientService.getAllPatients(),
+              StreamBuilder<List<WalkIn>>(
+                stream: walkinService.getAllWalk(),
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return Container(
@@ -219,7 +205,7 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Text('No appointments found');
                   } else {
-                    List<PatientModel> patient = snapshot.data!;
+                    List<WalkIn> patient = snapshot.data!;
 
                     return DataTable(
                       columns: const [

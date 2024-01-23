@@ -64,6 +64,7 @@ class _AppointmentDashState extends State<AppointmentDash> {
   Widget build(BuildContext context) {
     final AuthService _authService = AuthService();
     final AppointmentService appointmentService = AppointmentService();
+    final UserService userService = UserService(uid: _authService.uid!);
 
     return Scaffold(
       body: Center(
@@ -257,6 +258,9 @@ class _AppointmentDashState extends State<AppointmentDash> {
                                 ? CircularProgressIndicator()
                                 : ElevatedButton(
                                     onPressed: () async {
+                                      setState(() {
+                                        isLoading = true;
+                                      });
                                       NotificationService _noftifservice =
                                           NotificationService();
                                       var res = await appointmentService
@@ -268,7 +272,7 @@ class _AppointmentDashState extends State<AppointmentDash> {
                                           sucmsg = res;
                                         });
                                         var msg =
-                                            "You have recieve appointment request from ${_authService.uid}";
+                                            "You have recieve appointment request from ${userService.getUserDetailById(_authService.uid!)}";
                                         await _noftifservice
                                             .addAppointmentNotification(
                                                 _authService.uid!,
@@ -291,6 +295,9 @@ class _AppointmentDashState extends State<AppointmentDash> {
                                           errmsg = res;
                                         });
                                       }
+                                      setState(() {
+                                        isLoading = false;
+                                      });
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.blue,

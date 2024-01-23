@@ -73,6 +73,8 @@ class _UserDashState extends State<UserDash> {
 
   @override
   Widget build(BuildContext context) {
+    final AuthService authService = AuthService();
+    final NotificationService notificationService = NotificationService();
     return Scaffold(
       floatingActionButton: Tooltip(
         message: 'Start a conversation',
@@ -101,31 +103,62 @@ class _UserDashState extends State<UserDash> {
             ),
             onPressed: () {},
           ),
-          PopupMenuButton(
-            icon: Icon(
-              Icons.notifications,
-              size: 50,
-            ),
-            itemBuilder: (BuildContext context) {
-              return <PopupMenuEntry>[
-                PopupMenuItem(
-                  child: ListTile(
-                    title: Row(
-                      children: [
-                        Text("Notification "),
-                        hasData ? Text("🔴") : Container()
-                      ],
-                    ),
-                    onTap: () {
-                      // Handle the 'Notifications' menu item tap
-                      // For example, show a modal sheet with notifications
-                      showNotifications(context);
-                    },
-                  ),
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(
+                  Icons.notifications,
+                  size: 50,
                 ),
-                // Add more menu items if needed
-              ];
-            },
+                onPressed: () {
+                  // Show notifications and mark them as read when the icon is tapped
+                  showNotificationsModal(context);
+                },
+              ),
+              Positioned(
+                right: 0,
+                top: 5,
+                child: FutureBuilder<int>(
+                  future: notificationService
+                      .getUnreadNotificationCount(authService.uid!),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      // Display a loading indicator while fetching the count
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      // Handle error case
+                      return Text('Error: ${snapshot.error}');
+                    } else {
+                      // Display the retrieved count
+                      final int unreadCount = snapshot.data ?? 0;
+
+                      // Conditionally show or hide the container based on unreadCount
+                      return unreadCount > 0
+                          ? Container(
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              constraints: const BoxConstraints(
+                                minWidth: 18,
+                                minHeight: 18,
+                              ),
+                              child: Text(
+                                '$unreadCount',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : SizedBox(); // An empty SizedBox to effectively hide the container
+                    }
+                  },
+                ),
+              ),
+            ],
           ),
           IconButton(
             icon: const Icon(
@@ -139,6 +172,78 @@ class _UserDashState extends State<UserDash> {
         ],
       ),
       body: Text("This is sample"),
+    );
+  }
+}
+
+Future<void> showNotificationsModal(BuildContext context) async {
+  final NotificationService notificationService = NotificationService();
+  final AuthService authService = AuthService();
+  // Mark all notifications as read when showing the notifications
+  await notificationService.markAllNotificationsAsRead(authService.uid!);
+
+  showModalBottomSheet(
+    context: context,
+    builder: (BuildContext context) {
+      // Implement your notification list UI here
+      // You can use ListView.builder or any other widget to display notifications
+      return YourNotificationListWidget();
+    },
+  );
+}
+
+class YourNotificationListWidget extends StatelessWidget {
+  final NotificationService notificationService = NotificationService();
+  final AuthService authService = AuthService();
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          color: Colors.blue,
+          child: Text(
+            'Notifications',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        Expanded(
+          child: FutureBuilder<List<NotificationModel>>(
+            // Replace 'yourUserId' with the actual user ID
+            future:
+                notificationService.getMyNotifStream(authService.uid!).first,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: CircularProgressIndicator(),
+                );
+              } else if (snapshot.hasError) {
+                return Center(
+                  child: Text('Error: ${snapshot.error}'),
+                );
+              } else {
+                // Display the list of notifications
+                final List<NotificationModel> notifications =
+                    snapshot.data ?? [];
+                return ListView.builder(
+                  itemCount: notifications.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(notifications[index].notifMsg),
+                      // Add more details or customize the ListTile as needed
+                    );
+                  },
+                );
+              }
+            },
+          ),
+        ),
+      ],
     );
   }
 }

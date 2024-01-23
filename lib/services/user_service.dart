@@ -36,6 +36,27 @@ class UserService {
     }
   }
 
+  Future<String> getUserDetailById(String uId) async {
+    try {
+      DocumentSnapshot userSnapshot = await userCollection.doc(uId).get();
+
+      if (userSnapshot.exists) {
+        Map<String, dynamic> userData =
+            userSnapshot.data() as Map<String, dynamic>;
+
+        String firstName = userData['firstname'] ?? '';
+        String lastName = userData['lastname'] ?? '';
+
+        return "$firstName $lastName";
+      } else {
+        return "";
+      }
+    } catch (e) {
+      print('Error getting user by ID: $e');
+      throw e;
+    }
+  }
+
   Stream<UserModel?> getUser() {
     return FirebaseFirestore.instance
         .collection('users')
@@ -55,9 +76,9 @@ class UserService {
         return UserModel(
           email: email,
           uid: uid,
-          firstName: firstName,
-          middleName: middleName,
-          lastName: lastName,
+          firstname: firstName,
+          middlename: middleName,
+          lastname: lastName,
           address: address,
           role: role,
           photoUrl: photoUrl,
@@ -191,9 +212,9 @@ class UserService {
         return UserModel(
           email: userData['email'] ?? '',
           uid: doc.id,
-          firstName: userData['firstname'] ?? '',
-          middleName: userData['middlename'] ?? '',
-          lastName: userData['lastname'] ?? '',
+          firstname: userData['firstname'] ?? '',
+          middlename: userData['middlename'] ?? '',
+          lastname: userData['lastname'] ?? '',
           address: userData['address'] ?? '',
           role: userData['role'] ?? '',
           photoUrl: userData['photoUrl'] ?? '',
@@ -226,9 +247,9 @@ class UserService {
           UserModel user = UserModel(
             email: userData['email'] ?? '',
             uid: doc.id,
-            firstName: userData['firstname'] ?? '',
-            middleName: userData['middlename'] ?? '',
-            lastName: userData['lastname'] ?? '',
+            firstname: userData['firstname'] ?? '',
+            middlename: userData['middlename'] ?? '',
+            lastname: userData['lastname'] ?? '',
             address: userData['address'] ?? '',
             role: userData['role'] ?? '',
             photoUrl: userData['photoUrl'] ?? '',

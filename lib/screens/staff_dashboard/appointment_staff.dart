@@ -81,15 +81,17 @@ class _AppointmentStaffState extends State<AppointmentStaff> {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
+        final PetService petService = PetService(uid: userUid!);
         return AlertDialog(
-          title: Text('Confirm Approval'),
-          content: Text('Are you sure you want to approve this appointment?'),
+          title: const Text('Confirm Approval'),
+          content:
+              const Text('Are you sure you want to approve this appointment?'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog
               },
-              child: Text('Cancel'),
+              child: const Text('Cancel'),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -105,7 +107,7 @@ class _AppointmentStaffState extends State<AppointmentStaff> {
                   await patientService.addPatient(
                       userUid!, petId, appointmentDate);
                   var msg =
-                      "Staff approved your appointment for your pet with id ${petId} by ${DateFormat('MMMM d, y \'at\' h:mm a').format(appointmentDate)}";
+                      "Staff approved your appointment for your pet  ${await petService.getPetNameByUid(petId)} by ${DateFormat('MMMM d, y \'at\' h:mm a').format(appointmentDate)}";
                   await notificationService.addAppointmentNotification(
                       authService.uid!, userUid, msg);
                 } catch (e) {
@@ -125,6 +127,7 @@ class _AppointmentStaffState extends State<AppointmentStaff> {
     return showDialog(
       context: context,
       builder: (BuildContext context) {
+        final PetService petService = PetService(uid: userUid!);
         return AlertDialog(
           title: Text('Confirm Decline'),
           content: Text('Are you sure you want to decline this appointment?'),
@@ -140,7 +143,7 @@ class _AppointmentStaffState extends State<AppointmentStaff> {
                 // Close the dialog
                 Navigator.of(context).pop();
                 var msg =
-                    "Staff decline your appointment for your pet with id ${petId} by ${DateFormat('MMMM d, y \'at\' h:mm a').format(appointmentDate)}";
+                    "Staff decline your appointment for your pet with id ${await petService.getPetNameByUid(petId)} by ${DateFormat('MMMM d, y \'at\' h:mm a').format(appointmentDate)}";
                 await appointmentService.deleteAppointment(appointmentId);
 
                 await notificationService.addAppointmentNotification(

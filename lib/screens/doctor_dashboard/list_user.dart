@@ -62,7 +62,7 @@ class ListOfUserConvo extends StatelessWidget {
                 fit: BoxFit.cover,
               ),
             ),
-            title: Text('${user.firstName} ${user.lastName}'),
+            title: Text('${user.firstname} ${user.lastname}'),
             subtitle: Text(user.address),
           ),
           Positioned(
@@ -102,7 +102,7 @@ class ListOfUserConvo extends StatelessWidget {
   }
 
   void _navigateToUserDetails(BuildContext context, UserModel user) {
-    var fullname = "${user.firstName} ${user.lastName}";
+    var fullname = "${user.firstname} ${user.lastname}";
     // Implement the navigation logic to the user details screen
     Navigator.push(
         context,

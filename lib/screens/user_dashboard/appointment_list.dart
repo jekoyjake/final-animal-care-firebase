@@ -30,7 +30,11 @@ class AppointmentListForUser extends StatelessWidget {
         } else if (snapshot.hasError) {
           return Text('Error: ${snapshot.error}');
         } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Text('No appointments found');
+          return const Center(
+              child: Text(
+            'No appointments found',
+            style: TextStyle(fontSize: 30),
+          ));
         } else {
           List<AppointmentModel> appointments = snapshot.data!;
 
@@ -68,24 +72,6 @@ class AppointmentListForUser extends StatelessWidget {
                                         color: Colors.white),
                                   )
                                 : Text(appointment.status!)),
-                    DataCell(
-                      ElevatedButton(
-                        onPressed: () {
-                          // Add logic to handle the "View" button click
-                          // For now, print a message to the console
-                          print(
-                              'View button clicked for appointment ${appointment.uid}');
-                        },
-                        child: Text(
-                          'View',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          primary:
-                              Colors.green, // Set the button color to green
-                        ),
-                      ),
-                    ),
                   ],
                 );
               }).toList(),
@@ -124,12 +110,6 @@ class AppointmentListForUser extends StatelessWidget {
                       'Status',
                       style: TextStyle(fontSize: 20),
                     )),
-                    DataColumn(
-                      label: Text(
-                        'Options',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    ),
                   ],
                   rows: snapshot.data!,
                 );

@@ -21,7 +21,7 @@ class _AdminDashboardState extends State<AdminDashboard> {
       case 1:
         return const StaffAdmin();
       case 2:
-        return const AnnouncementAdmin();
+        return AnnouncementAdmin();
       default:
         return Container();
     }

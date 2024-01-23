@@ -1,7 +1,9 @@
+import 'package:animalcare/screens/admin_dashboard/add_doctor.dart';
+import 'package:flutter/material.dart';
 import 'package:animalcare/models/user.dart';
+import 'package:animalcare/screens/admin_dashboard/doctor_info_widget.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/user_service.dart';
-import 'package:flutter/material.dart';
 
 class DoctorDashboardAdmin extends StatefulWidget {
   const DoctorDashboardAdmin({super.key});
@@ -14,6 +16,7 @@ class _DoctorDashboardAdminState extends State<DoctorDashboardAdmin> {
   final UserService userService =
       UserService(uid: 'YOUR_USER_ID'); // Replace with actual user ID
   final AuthService _authService = AuthService();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -46,6 +49,12 @@ class _DoctorDashboardAdminState extends State<DoctorDashboardAdmin> {
               onPressed: () {
                 // Add doctor logic here
                 // Navigate to the screen where you can add a new doctor
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AddDoctorWidget(),
+                  ),
+                );
               },
               child: Text('Add Doctor'),
             ),
@@ -75,20 +84,29 @@ class _DoctorDashboardAdminState extends State<DoctorDashboardAdmin> {
       ),
     );
   }
-}
 
-Widget _buildDoctorCard(UserModel doctor) {
-  return Card(
-    elevation: 3,
-    margin: EdgeInsets.all(8.0),
-    child: ListTile(
-      leading: CircleAvatar(
-        backgroundImage: NetworkImage(doctor.photoUrl ?? ''),
-        radius: 25,
+  Widget _buildDoctorCard(UserModel doctor) {
+    return Card(
+      elevation: 3,
+      margin: EdgeInsets.all(8.0),
+      child: ListTile(
+        onTap: () {
+          // Navigate to the doctor's information screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DoctorInfoWidget(doctor: doctor),
+            ),
+          );
+        },
+        leading: CircleAvatar(
+          backgroundImage: NetworkImage(doctor.photoUrl ?? ''),
+          radius: 25,
+        ),
+        title: Text(doctor.firstname + ' ' + doctor.lastname),
+        subtitle: Text(doctor.role),
+        // Add more doctor information here if needed
       ),
-      title: Text(doctor.firstName + ' ' + doctor.lastName),
-      subtitle: Text(doctor.role),
-      // Add more doctor information here if needed
-    ),
-  );
+    );
+  }
 }

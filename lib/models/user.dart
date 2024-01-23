@@ -1,8 +1,8 @@
 class UserModel {
   final String uid;
-  final String firstName;
-  final String? middleName;
-  final String lastName;
+  final String firstname;
+  final String? middlename;
+  final String lastname;
   final String? email;
   final String address;
   final String contactNo;
@@ -12,9 +12,9 @@ class UserModel {
   UserModel(
       {required this.email,
       required this.uid,
-      required this.firstName,
-      this.middleName,
-      required this.lastName,
+      required this.firstname,
+      this.middlename,
+      required this.lastname,
       required this.address,
       required this.contactNo,
       required this.role,

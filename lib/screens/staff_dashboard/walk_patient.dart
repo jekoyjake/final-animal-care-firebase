@@ -59,7 +59,7 @@ class _WalkInFormState extends State<WalkInForm> {
 
       String result = await walkinService.addWalkIn(
           _fullnameController.text,
-          _petageController.text,
+          _petnameController.text,
           _petspeciesController.text,
           _petbreedController.text,
           _petageController.text,

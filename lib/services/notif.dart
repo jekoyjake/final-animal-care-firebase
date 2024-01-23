@@ -77,4 +77,50 @@ class NotificationService {
           .toList();
     });
   }
+
+  Future<int> getUnreadNotificationCount(String userId) async {
+    try {
+      final QuerySnapshot querySnapshot = await _collectionReference
+          .where('forUserUid', isEqualTo: userId)
+          .where('read', isEqualTo: false)
+          .get();
+
+      // Return the count of unread notifications
+      return querySnapshot.size;
+    } catch (error) {
+      print('Error getting unread notification count: $error');
+      return 0; // Return 0 in case of an error
+    }
+  }
+
+  Future<void> markAllNotificationsAsRead(String userId) async {
+    try {
+      final QuerySnapshot querySnapshot = await _collectionReference
+          .where('forUserUid', isEqualTo: userId)
+          .where('read', isEqualTo: false)
+          .get();
+
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        // Update each notification to mark it as read
+        await doc.reference.update({'read': true});
+      }
+    } catch (error) {
+      print('Error marking notifications as read: $error');
+    }
+  }
+
+  Future<void> deleteAllNotificationsByUserId(String userId) async {
+    try {
+      final QuerySnapshot querySnapshot = await _collectionReference
+          .where('forUserUid', isEqualTo: userId)
+          .get();
+
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        // Delete each notification
+        await doc.reference.delete();
+      }
+    } catch (error) {
+      print('Error deleting notifications: $error');
+    }
+  }
 }

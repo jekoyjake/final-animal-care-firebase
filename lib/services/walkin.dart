@@ -51,6 +51,32 @@ class WalkinService {
     }
   }
 
+  Future<List<WalkIn>> getAllWalkinByAppointmentDate(
+      DateTime appointmentDate) async {
+    try {
+      QuerySnapshot walkInsSnapshot = await walkInsCollection
+          .where('appointmentDate', isEqualTo: appointmentDate)
+          .get();
+
+      return walkInsSnapshot.docs.map((doc) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+        return WalkIn(
+          uid: doc.id,
+          fullname: data['fullname'] ?? '',
+          petname: data['petname'] ?? '',
+          petspecies: data['petspecies'] ?? '',
+          petbreed: data['petbreed'] ?? '',
+          petage: data['petage'] ?? '',
+          appointmentDate: (data['appointmentDate'] as Timestamp).toDate(),
+        );
+      }).toList();
+    } catch (e) {
+      print('Error getting walk-ins by appointment date: $e');
+      return [];
+    }
+  }
+
   Future<List<WalkIn>> getAllWalkIns() async {
     try {
       QuerySnapshot walkInsSnapshot = await walkInsCollection.get();
@@ -71,6 +97,29 @@ class WalkinService {
     } catch (e) {
       print('Error getting all walk-ins: $e');
       return [];
+    }
+  }
+
+  Stream<List<WalkIn>> getAllWalk() {
+    try {
+      return walkInsCollection.snapshots().map((QuerySnapshot walkInsSnapshot) {
+        return walkInsSnapshot.docs.map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+
+          return WalkIn(
+            uid: doc.id,
+            fullname: data['fullname'] ?? '',
+            petname: data['petname'] ?? '',
+            petspecies: data['petspecies'] ?? '',
+            petbreed: data['petbreed'] ?? '',
+            petage: data['petage'] ?? '',
+            appointmentDate: (data['appointmentDate'] as Timestamp).toDate(),
+          );
+        }).toList();
+      });
+    } catch (e) {
+      print('Error getting all walk-ins: $e');
+      return Stream.value([]); // Return an empty stream in case of an error
     }
   }
 

@@ -41,15 +41,22 @@ class DoctorDrawer extends StatelessWidget {
               Align(
                 alignment: Alignment.center,
                 child: UserAccountsDrawerHeader(
-                  accountName: Text("${user?.firstName} ${user?.lastName}"),
+                  accountName: Text("${user?.firstname} ${user?.lastname}"),
                   currentAccountPicture: CircleAvatar(
                     child: ClipOval(
-                      child: Image.network(
-                        user?.photoUrl ?? '',
-                        width: 90,
-                        height: 90,
-                        fit: BoxFit.cover,
-                      ),
+                      child: user!.photoUrl?.isNotEmpty ?? false
+                          ? Image.network(
+                              user.photoUrl!,
+                              width: 90,
+                              height: 90,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.asset(
+                              'assets/default.png',
+                              width: 90,
+                              height: 90,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                   accountEmail: Text("${user?.email}"),
@@ -89,7 +96,7 @@ class DoctorDrawer extends StatelessWidget {
                 color: Colors.white,
               ),
               Image.asset(
-                "/lagunalogo.png",
+                "assets/lagunalogo.png",
                 width: 250,
                 height: 250,
               )

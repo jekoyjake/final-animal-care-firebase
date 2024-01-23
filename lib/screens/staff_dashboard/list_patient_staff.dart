@@ -8,14 +8,14 @@ import 'package:animalcare/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class PatientDashboardDoctor extends StatefulWidget {
-  const PatientDashboardDoctor({super.key});
+class PatientDashboardStaff extends StatefulWidget {
+  const PatientDashboardStaff({super.key});
 
   @override
-  State<PatientDashboardDoctor> createState() => _PatientDashboardDoctorState();
+  State<PatientDashboardStaff> createState() => _PatientDashboardStaffState();
 }
 
-class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
+class _PatientDashboardStaffState extends State<PatientDashboardStaff> {
   final AuthService _authService = AuthService();
   final PatientService _patientService = PatientService();
 
@@ -85,31 +85,12 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
             Row(
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddPrescriptionWidget(
-                          petUid: patient.petUid,
-                        ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
-                  child: const Text(
-                    'Add Prescription',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                ElevatedButton(
                   onPressed: () async {},
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.orangeAccent,
                   ),
                   child: const Text(
-                    'Make New Appointment',
+                    'View',
                     style: TextStyle(color: Colors.white),
                   ),
                 )
@@ -187,12 +168,12 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
                         primary: Colors
                             .redAccent, // Change this color to your desired background color
                       ),
-                      child: Text(
+                      child: const Text(
                         'FILTER BY APPOINTMENT DATE',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
-                    SizedBox(width: 16.0),
+                    const SizedBox(width: 16.0),
                     Text(_selectedDate.isNotEmpty
                         ? 'Selected Date: $_selectedDate'
                         : 'No date selected'),

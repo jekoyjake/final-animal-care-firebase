@@ -6,7 +6,7 @@ class Prescription {
   final String frequency;
   final String petUid;
   final String doctorUid;
-  final DateTime prescriptionDate;
+  final String prescriptionDate;
 
   Prescription({
     required this.id,

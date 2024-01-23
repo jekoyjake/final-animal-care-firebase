@@ -27,9 +27,9 @@ class _SettingsState extends State<Settings> {
       UserModel? currentUser = await _authService.user.first;
       if (currentUser != null) {
         setState(() {
-          _firstNameController.text = currentUser.firstName ?? '';
-          _middleNameController.text = currentUser.middleName ?? '';
-          _lastNameController.text = currentUser.lastName ?? '';
+          _firstNameController.text = currentUser.firstname ?? '';
+          _middleNameController.text = currentUser.middlename ?? '';
+          _lastNameController.text = currentUser.lastname ?? '';
           _addressController.text = currentUser.address ?? '';
           // Set the initial imageBytes if the user has a profile photo
 
@@ -143,9 +143,12 @@ class _SettingsState extends State<Settings> {
       appBar: AppBar(
         title: Text('Edit User Info'),
         actions: [
+          Text("Change Passoword"),
           IconButton(
-            icon: Icon(Icons.save),
-            onPressed: _updateUser,
+            icon: Icon(Icons.lock),
+            onPressed: () async {
+              await _showChangePasswordDialog(context);
+            },
           ),
         ],
       ),
@@ -235,4 +238,53 @@ class _SettingsState extends State<Settings> {
       ),
     );
   }
+
+  Future<void> _showChangePasswordDialog(BuildContext context) async {
+    TextEditingController oldPasswordController = TextEditingController();
+    TextEditingController newPasswordController = TextEditingController();
+
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Change Password'),
+          content: Column(
+            children: [
+              TextField(
+                controller: oldPasswordController,
+                decoration: InputDecoration(labelText: 'Old Password'),
+                obscureText: true,
+              ),
+              TextField(
+                controller: newPasswordController,
+                decoration: InputDecoration(labelText: 'New Password'),
+                obscureText: true,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                // Call your changePassword function with the entered values
+                _changePassword(
+                  oldPasswordController.text,
+                  newPasswordController.text,
+                );
+                Navigator.of(context).pop();
+              },
+              child: Text('Change'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _changePassword(String oldPassword, String newPassword) {}
 }

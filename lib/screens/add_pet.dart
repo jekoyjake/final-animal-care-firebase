@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:animalcare/screens/wrapper.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/pet_service.dart';
@@ -16,17 +15,23 @@ class AddPetScreen extends StatefulWidget {
 class _AddPetScreenState extends State<AddPetScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _speciesController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
   final TextEditingController _breedController = TextEditingController();
   final AuthService _authService = AuthService();
   Uint8List? _imageBytes;
 
+  // List of species options
+  final List<String> speciesOptions = ['Cat', 'Dog', 'Others'];
+
+  // Variable to store the selected species
+  String? selectedSpecies;
+  String sucmsg = "";
+
   void _submit() {
     if (_formKey.currentState!.validate()) {
       // If form is valid, proceed with adding the pet
       final String name = _nameController.text.trim();
-      final String species = _speciesController.text.trim();
+      final String species = selectedSpecies!;
       final int age = int.parse(_ageController.text.trim());
       final String breed = _breedController.text.trim();
 
@@ -35,17 +40,15 @@ class _AddPetScreenState extends State<AddPetScreen> {
 
       // Then navigate back to the previous screen
       PetService(uid: _authService.uid!).addPet(
-          name: name,
-          species: species,
-          age: age,
-          breed: breed,
-          photoFile: _imageBytes);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const Wrapper(),
-        ),
+        name: name,
+        species: species,
+        age: age,
+        breed: breed,
+        photoFile: _imageBytes,
       );
+      setState(() {
+        sucmsg = "Pet Successfully added";
+      });
     }
   }
 
@@ -73,7 +76,6 @@ class _AddPetScreenState extends State<AddPetScreen> {
       );
       if (result != null) {
         // If the user picks an image, update the state with the new image file
-
         var res = result.files.first;
         var converted = await fileToUint8List(res);
 
@@ -154,8 +156,20 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("Species"),
-                        TextFormField(
-                          controller: _speciesController,
+                        // Replace TextFormField with DropdownButtonFormField
+                        DropdownButtonFormField<String>(
+                          value: selectedSpecies,
+                          onChanged: (String? value) {
+                            setState(() {
+                              selectedSpecies = value;
+                            });
+                          },
+                          items: speciesOptions.map((String species) {
+                            return DropdownMenuItem<String>(
+                              value: species,
+                              child: Text(species),
+                            );
+                          }).toList(),
                           decoration: InputDecoration(
                             filled: true,
                             border: OutlineInputBorder(
@@ -168,7 +182,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
                           ),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
-                              return 'Please enter a species';
+                              return 'Please select a species';
                             }
                             return null;
                           },
@@ -253,6 +267,15 @@ class _AddPetScreenState extends State<AddPetScreen> {
                 },
                 child: const Text('Submit'),
               ),
+              const SizedBox(
+                height: 20,
+              ),
+              Text(
+                sucmsg,
+                style: const TextStyle(
+                  color: Colors.green,
+                ),
+              )
             ],
           ),
         ),

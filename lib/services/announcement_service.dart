@@ -59,6 +59,7 @@ class AnnouncementService {
         Map<String, dynamic> data =
             doc.data() as Map<String, dynamic>; // Adjust per your structure
         return Announcement(
+          uid: doc.id,
           ownerUid: data['ownerUid'] ?? '',
           title: data['title'] ?? '',
           content: data['content'] ?? '',
@@ -82,6 +83,7 @@ class AnnouncementService {
         Map<String, dynamic> data =
             doc.data() as Map<String, dynamic>; // Adjust per your structure
         return Announcement(
+          uid: doc.id,
           ownerUid: data['ownerUid'] ?? '',
           title: data['title'] ?? '',
           content: data['content'] ?? '',

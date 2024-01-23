@@ -12,7 +12,7 @@ class PrescriptionService {
     required String frequency,
     required String petUid,
     required String doctorUid,
-    required DateTime prescriptionDate,
+    required String prescriptionDate,
   }) async {
     try {
       await _prescriptionsCollection.add({
@@ -22,7 +22,7 @@ class PrescriptionService {
         'frequency': frequency,
         'petUid': petUid,
         'doctorUid': doctorUid,
-        'prescriptionDate': prescriptionDate,
+        'prescriptionDate': prescriptionDate
       });
     } catch (e) {
       print('Error adding prescription: $e');
@@ -48,7 +48,7 @@ class PrescriptionService {
           frequency: prescriptionData['frequency'] ?? '',
           petUid: prescriptionData['petUid'] ?? '',
           doctorUid: prescriptionData['doctorUid'] ?? '',
-          prescriptionDate: prescriptionData['prescriptionDate'].toDate(),
+          prescriptionDate: prescriptionData['prescriptionDate'] ?? '',
         );
       }).toList();
 

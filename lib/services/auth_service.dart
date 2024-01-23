@@ -23,6 +23,23 @@ class AuthService {
     }
   }
 
+  Future<String?> getEmailByUid(String uid) async {
+    try {
+      DocumentSnapshot userSnapshot = await userCollection.doc(uid).get();
+      print(userSnapshot.data());
+
+      if (userSnapshot.exists) {
+        String email = userSnapshot.get('email');
+        return email;
+      } else {
+        return null; // User with the provided UID not found
+      }
+    } catch (e) {
+      print("Error getting email by UID: $e");
+      return null;
+    }
+  }
+
   Stream<UserModel?> get user {
     return _auth.authStateChanges().asyncMap((User? user) async {
       if (user != null) {
@@ -48,9 +65,9 @@ class AuthService {
             return UserModel(
               email: email,
               uid: uid,
-              firstName: firstname,
-              middleName: middlename,
-              lastName: lastname,
+              firstname: firstname,
+              middlename: middlename,
+              lastname: lastname,
               address: address,
               role: role,
               photoUrl: photo,
@@ -134,6 +151,44 @@ class AuthService {
     }
   }
 
+  Future<String> addDoctor(
+    String email,
+    String password,
+    String firstname,
+    String? middlename,
+    String lastname,
+    String address,
+    String contactNo,
+  ) async {
+    try {
+      // Get the current user
+
+      // Add the doctor
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential.user != null) {
+        await UserService(uid: userCredential.user!.uid).addUser(
+          firstname,
+          "middlename",
+          lastname,
+          address,
+          "doctor",
+          contactNo,
+        );
+      }
+
+      return "You have successfully added a doctor!";
+    } on FirebaseAuthException catch (e) {
+      return e.message.toString();
+    } on FirebaseException catch (error) {
+      return error.message.toString();
+    }
+  }
+
   Future<void> changePassword(String oldPassword, String newPassword) async {
     try {
       // Get the current user
@@ -176,18 +231,8 @@ class AuthService {
   }
 
   Future<String> sendPasswordResetEmail(String email) async {
-    try {
-      bool emailExists = await doesEmailExist(email);
-
-      if (emailExists) {
-        await _auth.sendPasswordResetEmail(email: email);
-        return "Please check your email for a password reset link.";
-      } else {
-        return "Email not found. Please enter a valid email address.";
-      }
-    } on FirebaseAuthException catch (e) {
-      return e.message ?? "An unknown error occurred.";
-    }
+    await _auth.sendPasswordResetEmail(email: email);
+    return "Please check your email for a password reset link.";
   }
 
   Future<void> signOut() async {
