@@ -4,8 +4,10 @@ import 'package:animalcare/models/user.dart';
 import 'package:animalcare/screens/wrapper.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/user_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 
 class Settings extends StatefulWidget {
   const Settings({Key? key}) : super(key: key);
@@ -55,6 +57,7 @@ class _SettingsState extends State<Settings> {
   TextEditingController _contactNo = TextEditingController();
   bool isLoading = false;
   final AuthService _authService = AuthService();
+  bool isWeb = kIsWeb;
 
   Future<Uint8List?> fileToUint8List(PlatformFile file) async {
     try {
@@ -70,6 +73,18 @@ class _SettingsState extends State<Settings> {
     } catch (e) {
       print('Error converting file to Uint8List: $e');
       return null;
+    }
+  }
+
+  Future<void> _getImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      var converted = await fileToUint8List(pickedFile as PlatformFile);
+      setState(() {
+        _imageBytes = converted;
+      });
     }
   }
 
@@ -172,7 +187,13 @@ class _SettingsState extends State<Settings> {
               ),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: pickAndUploadImage,
+                onPressed: () {
+                  if (isWeb) {
+                    pickAndUploadImage();
+                  } else {
+                    _getImage();
+                  }
+                },
                 child: Text('Change Profile Picture'),
               ),
               SizedBox(height: 20),

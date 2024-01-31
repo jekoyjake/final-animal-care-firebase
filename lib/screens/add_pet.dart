@@ -1,9 +1,13 @@
+import 'dart:io';
 import 'dart:typed_data';
+import 'package:animalcare/models/walkin_patient.dart';
 import 'package:animalcare/screens/wrapper.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/pet_service.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddPetScreen extends StatefulWidget {
   const AddPetScreen({Key? key}) : super(key: key);
@@ -28,6 +32,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
   String sucmsg = "";
   bool isLoading = false;
   bool isOthers = false;
+  bool isWeb = kIsWeb;
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
@@ -81,6 +86,18 @@ class _AddPetScreenState extends State<AddPetScreen> {
     }
   }
 
+  Future<void> _getImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      var converted = await fileToUint8List(pickedFile as PlatformFile);
+      setState(() {
+        _imageBytes = converted;
+      });
+    }
+  }
+
   Future<void> pickAndUploadImage() async {
     try {
       FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -123,7 +140,11 @@ class _AddPetScreenState extends State<AddPetScreen> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  await pickAndUploadImage();
+                  if (isWeb) {
+                    await pickAndUploadImage();
+                  } else {
+                    await _getImage();
+                  }
                 },
                 child: const Text('Add Image'),
               ),
