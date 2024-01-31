@@ -27,6 +27,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
   String? selectedSpecies;
   String sucmsg = "";
   bool isLoading = false;
+  bool isOthers = false;
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
@@ -167,12 +168,12 @@ class _AddPetScreenState extends State<AddPetScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text("Species"),
-                        // Replace TextFormField with DropdownButtonFormField
                         DropdownButtonFormField<String>(
                           value: selectedSpecies,
                           onChanged: (String? value) {
                             setState(() {
                               selectedSpecies = value;
+                              isOthers = value == "Others";
                             });
                           },
                           items: speciesOptions.map((String species) {
@@ -198,6 +199,31 @@ class _AddPetScreenState extends State<AddPetScreen> {
                             return null;
                           },
                         ),
+                        isOthers
+                            ? TextFormField(
+                                decoration: InputDecoration(
+                                  hintText: "Please specify",
+                                  filled: true,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    borderSide: const BorderSide(
+                                      color: Colors.blue,
+                                      width: 2.0,
+                                    ),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (isOthers &&
+                                      (value == null || value.isEmpty)) {
+                                    return 'Please specify';
+                                  }
+                                  setState(() {
+                                    selectedSpecies = value;
+                                  });
+                                  return null;
+                                },
+                              )
+                            : Container(),
                       ],
                     ),
                   ),

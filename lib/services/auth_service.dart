@@ -60,6 +60,7 @@ class AuthService {
             String contact = userSnapshot.get('contactNo') as String? ?? '';
             String role = userSnapshot.get('role') as String? ?? '';
             String photo = userSnapshot.get('photoUrl') as String? ?? '';
+            bool isOn = userSnapshot.get('isOnline');
 
             // Return UserModel instance
             return UserModel(
@@ -72,6 +73,7 @@ class AuthService {
               role: role,
               photoUrl: photo,
               contactNo: contact,
+              isOnline: isOn,
             );
           }
         } on FirebaseException catch (e) {
@@ -118,6 +120,8 @@ class AuthService {
         email: email,
         password: password,
       );
+      final UserService _userService = UserService(uid: _auth.currentUser!.uid);
+      await _userService.updateUserOnlineStatus(true);
       return "200";
     } on FirebaseAuthException catch (e) {
       return e.message!;
@@ -236,7 +240,10 @@ class AuthService {
   }
 
   Future<void> signOut() async {
+    final UserService _userService = UserService(uid: _auth.currentUser!.uid);
     try {
+      await _userService.updateUserOnlineStatus(false);
+
       await _auth.signOut();
     } catch (e) {
       print('Error signing out: $e');

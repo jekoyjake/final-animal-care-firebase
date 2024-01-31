@@ -362,14 +362,15 @@ void showChatDialog(BuildContext context) {
                   String message = _messageController.text.trim();
                   if (message.isNotEmpty) {
                     await chatService.sendMessageToDoctor(message);
+
                     _messageController.clear();
                   }
                 },
-                child: Text('Send'),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue,
-                  onPrimary: Colors.white,
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blue,
                 ),
+                child: const Text('Send'),
               ),
             ],
           ),

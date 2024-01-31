@@ -5,6 +5,7 @@ import 'package:animalcare/services/announcement_service.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/chat_service.dart';
 import 'package:animalcare/services/notif.dart';
+import 'package:animalcare/services/user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -379,6 +380,41 @@ void showChatDialog(BuildContext context) {
                   if (message.isNotEmpty) {
                     await chatService.sendMessageToDoctor(message);
                     _messageController.clear();
+                    final UserService userService =
+                        UserService(uid: authService.uid!);
+
+                    bool hasOnlineDoctors =
+                        await userService.hasOnlineDoctors();
+                    if (!hasOnlineDoctors) {
+                      try {
+                        String userDetail = await userService
+                            .getUserDetailById(authService.uid!);
+
+                        if (userDetail.isNotEmpty) {
+                          String msg = '''
+        "Hi $userDetail, thanks for contacting us.
+        We've received your message and appreciate you reaching out. 
+        We are currently busy or the doctor is not online, but we will get back to you as soon as we can.
+        Clinic Hours: 8AM to 4PM
+        OPEN: MONDAY - FRIDAY
+        CLOSED: SATURDAY & SUNDAY 
+        Stay safe & God Bless! 😉 "
+      ''';
+
+                          await chatService.sendMessageToClient(
+                              authService.uid!, msg);
+                        } else {
+                          // Handle the case where userDetail is an empty string
+                          print('User details not available.');
+                        }
+                      } catch (e) {
+                        // Handle the exception if any occurs during the process
+                        print('Error: $e');
+                      }
+                    } else {
+                      // No online doctors
+                      print('There are online doctors.');
+                    }
                   }
                 },
                 child: Text('Send'),

@@ -36,6 +36,20 @@ class UserService {
     }
   }
 
+  Future<bool> hasOnlineDoctors() async {
+    try {
+      QuerySnapshot querySnapshot = await userCollection
+          .where('role', isEqualTo: 'doctor')
+          .where('isOnline', isEqualTo: true)
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error checking for online doctors: $e');
+      throw e;
+    }
+  }
+
   Future<String> getUserDetailById(String uId) async {
     try {
       DocumentSnapshot userSnapshot = await userCollection.doc(uId).get();
@@ -72,6 +86,7 @@ class UserService {
         String contactNo = userSnapshot.get('contactNo') as String;
         String role = userSnapshot.get('role') as String;
         String? photoUrl = userSnapshot.get('photoUrl') as String?;
+        bool isOn = userSnapshot.get('isOnline');
 
         return UserModel(
           email: email,
@@ -83,6 +98,7 @@ class UserService {
           role: role,
           photoUrl: photoUrl,
           contactNo: contactNo,
+          isOnline: isOn,
         );
       } else {
         return null;
@@ -100,7 +116,8 @@ class UserService {
         'address': address,
         'role': role,
         'contactNo': contactNo,
-        'photoUrl': ''
+        'photoUrl': '',
+        'isOnline': true
       };
 
       // Add middlename to userData if it's not null or empty
@@ -210,22 +227,35 @@ class UserService {
         Map<String, dynamic> userData =
             doc.data() as Map<String, dynamic>; // Update as per your structure
         return UserModel(
-          email: userData['email'] ?? '',
-          uid: doc.id,
-          firstname: userData['firstname'] ?? '',
-          middlename: userData['middlename'] ?? '',
-          lastname: userData['lastname'] ?? '',
-          address: userData['address'] ?? '',
-          role: userData['role'] ?? '',
-          photoUrl: userData['photoUrl'] ?? '',
-          contactNo: userData['contactNo'],
-        );
+            email: userData['email'] ?? '',
+            uid: doc.id,
+            firstname: userData['firstname'] ?? '',
+            middlename: userData['middlename'] ?? '',
+            lastname: userData['lastname'] ?? '',
+            address: userData['address'] ?? '',
+            role: userData['role'] ?? '',
+            photoUrl: userData['photoUrl'] ?? '',
+            contactNo: userData['contactNo'],
+            isOnline: userData['isOnline']);
       }).toList();
 
       return users;
     } catch (e) {
       print('Error getting users by role: $e');
       throw e;
+    }
+  }
+
+  Future<void> updateUserOnlineStatus(bool isOnline) async {
+    try {
+      // Update user's online status in Firestore
+      await userCollection.doc(uid).update({
+        'isOnline': isOnline,
+      });
+    } catch (e) {
+      // Handle errors
+      print('Error updating user online status: $e');
+      rethrow; // Rethrow the exception for higher-level handling
     }
   }
 
@@ -245,16 +275,16 @@ class UserService {
 
         if (hasMessages) {
           UserModel user = UserModel(
-            email: userData['email'] ?? '',
-            uid: doc.id,
-            firstname: userData['firstname'] ?? '',
-            middlename: userData['middlename'] ?? '',
-            lastname: userData['lastname'] ?? '',
-            address: userData['address'] ?? '',
-            role: userData['role'] ?? '',
-            photoUrl: userData['photoUrl'] ?? '',
-            contactNo: userData['contactNo'],
-          );
+              email: userData['email'] ?? '',
+              uid: doc.id,
+              firstname: userData['firstname'] ?? '',
+              middlename: userData['middlename'] ?? '',
+              lastname: userData['lastname'] ?? '',
+              address: userData['address'] ?? '',
+              role: userData['role'] ?? '',
+              photoUrl: userData['photoUrl'] ?? '',
+              contactNo: userData['contactNo'],
+              isOnline: userData['isOnline']);
 
           users.add(user);
         }

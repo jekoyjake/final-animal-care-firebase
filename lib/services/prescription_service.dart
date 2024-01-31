@@ -59,5 +59,37 @@ class PrescriptionService {
     }
   }
 
+  Future<Prescription?> viewPrescriptionByUid(String PetUid) async {
+    try {
+      QuerySnapshot querySnapshot = await _prescriptionsCollection
+          .where('petUid', isEqualTo: PetUid)
+          .limit(1) // Limit to 1 document since we only need one prescription
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // If there's at least one prescription
+        Map<String, dynamic> prescriptionData =
+            querySnapshot.docs.first.data() as Map<String, dynamic>;
+
+        return Prescription(
+          id: querySnapshot.docs.first.id,
+          dianosis: prescriptionData['diagnosis'] ?? '',
+          medicationName: prescriptionData['medicationName'] ?? '',
+          dosage: prescriptionData['dosage'] ?? '',
+          frequency: prescriptionData['frequency'] ?? '',
+          petUid: prescriptionData['petUid'] ?? '',
+          doctorUid: prescriptionData['doctorUid'] ?? '',
+          prescriptionDate: prescriptionData['prescriptionDate'] ?? '',
+        );
+      } else {
+        // If no prescription found
+        return null;
+      }
+    } catch (e) {
+      print('Error viewing prescription by petUid: $e');
+      throw e;
+    }
+  }
+
   // Add more methods for update, delete, and other operations as needed
 }

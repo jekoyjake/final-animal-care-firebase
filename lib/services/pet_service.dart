@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:animalcare/models/pet.dart';
@@ -15,22 +14,18 @@ class PetService {
 
   Future<String> _uploadImage(Uint8List imageFile) async {
     try {
-      // Get a reference to the location where we'll store the file in Firebase Storage
       Reference storageReference = FirebaseStorage.instance
           .ref()
           .child('pet_images/${DateTime.now()}.png');
 
-      // Upload the file to Firebase Storage
       await storageReference.putData(imageFile);
 
-      // Get the download URL
       String downloadUrl = await storageReference.getDownloadURL();
 
       return downloadUrl;
     } catch (e) {
-      // Handle errors
       print('Error uploading image: $e');
-      rethrow; // Rethrow the exception for higher-level handling
+      rethrow;
     }
   }
 
@@ -42,11 +37,9 @@ class PetService {
         String petName = documentSnapshot['name'];
         return petName;
       } else {
-        // Handle the case where the document with the given UID does not exist
         return "Pet Name";
       }
     } catch (e) {
-      // Handle any errors that occurred during the data retrieval process
       print("Error getting pet name by UID: $e");
       return e.toString();
     }

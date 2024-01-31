@@ -8,6 +8,7 @@ class UserModel {
   final String contactNo;
   final String role;
   String? photoUrl;
+  final bool isOnline;
 
   UserModel(
       {required this.email,
@@ -18,5 +19,6 @@ class UserModel {
       required this.address,
       required this.contactNo,
       required this.role,
+      required this.isOnline,
       this.photoUrl});
 }

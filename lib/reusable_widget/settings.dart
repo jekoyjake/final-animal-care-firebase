@@ -242,6 +242,7 @@ class _SettingsState extends State<Settings> {
   Future<void> _showChangePasswordDialog(BuildContext context) async {
     TextEditingController oldPasswordController = TextEditingController();
     TextEditingController newPasswordController = TextEditingController();
+    final AuthService _auth = AuthService();
 
     await showDialog<void>(
       context: context,
@@ -286,5 +287,7 @@ class _SettingsState extends State<Settings> {
     );
   }
 
-  void _changePassword(String oldPassword, String newPassword) {}
+  void _changePassword(String oldPassword, String newPassword) {
+    _authService.changePassword(oldPassword, newPassword);
+  }
 }

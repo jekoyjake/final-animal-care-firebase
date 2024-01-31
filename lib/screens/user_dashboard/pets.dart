@@ -1,11 +1,13 @@
 import 'package:animalcare/models/message.dart';
 import 'package:animalcare/models/notification.dart';
 import 'package:animalcare/models/prescription.dart';
+import 'package:animalcare/screens/user_dashboard/pres_detail.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/chat_service.dart';
 import 'package:animalcare/services/notif.dart';
 import 'package:animalcare/services/pet_service.dart';
 import 'package:animalcare/services/prescription_service.dart';
+import 'package:animalcare/services/user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:animalcare/models/pet.dart';
@@ -252,6 +254,7 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.pet.name),
@@ -259,81 +262,201 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
       body: Center(
         child: Padding(
           padding: EdgeInsets.all(30),
-          child: Row(
-            children: [
-              // Left Container
-              Container(
-                width: MediaQuery.of(context).size.width *
-                    0.4, // Adjust the width as needed
-                height: MediaQuery.of(context).size.height *
-                    0.8, // Adjust the height as needed
-                decoration:
-                    BoxDecoration(color: Colors.grey, border: Border.all()),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.network(
-                      widget.pet.photoUrl,
-                      fit: BoxFit.cover,
-                      height: 200.0,
-                    ),
-                    SizedBox(height: 16.0),
-                    Text(
-                      "Species: ${widget.pet.species}",
-                      style: TextStyle(fontSize: 18.0),
-                    ),
-                    SizedBox(height: 8.0),
-                    Text(
-                      "Breed: ${widget.pet.breed}",
-                      style: TextStyle(fontSize: 18.0),
-                    ),
-                    // Add more details as needed
-                  ],
-                ),
-              ),
-              SizedBox(width: 30),
-
-              // Right Container (Prescription list)
-              Expanded(
-                child: FutureBuilder<List<Prescription>>(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // Left Container
+                !isMobile
+                    ? Container(
+                        width: MediaQuery.of(context).size.width *
+                            0.8, // Adjust the width as needed
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height *
+                              0.6, // Set max height
+                        ),
+                        decoration: BoxDecoration(
+                            color: Colors.white70, border: Border.all()),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            ClipOval(
+                              child: Image.network(
+                                widget.pet.photoUrl,
+                                fit: BoxFit.cover,
+                                height: MediaQuery.of(context).size.height < 600
+                                    ? 200.0
+                                    : 400,
+                                width: MediaQuery.of(context).size.height < 600
+                                    ? 200.0
+                                    : 400,
+                              ),
+                            ),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Species: ${widget.pet.species}",
+                                  style: const TextStyle(fontSize: 25.0),
+                                ),
+                                const SizedBox(height: 8.0),
+                                Text(
+                                  "Breed: ${widget.pet.breed}",
+                                  style: const TextStyle(fontSize: 25.0),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 60.0),
+                            // Add more details as needed
+                          ],
+                        ),
+                      )
+                    : Container(
+                        width: MediaQuery.of(context).size.width *
+                            0.8, // Adjust the width as needed
+                        constraints: BoxConstraints(
+                          maxHeight: MediaQuery.of(context).size.height *
+                              0.6, // Set max height
+                        ),
+                        decoration: BoxDecoration(
+                            color: Colors.white70, border: Border.all()),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ClipOval(
+                              child: Image.network(
+                                widget.pet.photoUrl,
+                                fit: BoxFit.cover,
+                                height: 150.0,
+                                width: 150.0,
+                              ),
+                            ),
+                            const SizedBox(height: 16.0),
+                            Text(
+                              "Species: ${widget.pet.species}",
+                              style: const TextStyle(fontSize: 18.0),
+                            ),
+                            const SizedBox(height: 8.0),
+                            Text(
+                              "Breed: ${widget.pet.breed}",
+                              style: const TextStyle(fontSize: 18.0),
+                            ),
+                            // Add more details as needed
+                          ],
+                        ),
+                      ),
+                const SizedBox(width: 30),
+                // Right Container (Prescription list)
+                FutureBuilder<List<Prescription>>(
                   future: _prescriptionService
                       .getPrescriptionsForPet(widget.pet.id),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator();
+                      return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
                       return Text('Error: ${snapshot.error}');
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Text("No prescriptions found");
+                      return const Center(
+                          child: Text("No prescriptions found",
+                              style: TextStyle(fontSize: 25.0)));
                     } else {
                       List<Prescription> prescriptions = snapshot.data!;
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             "Doctor's Prescriptions",
                             style: TextStyle(fontSize: 30),
                           ),
-                          Expanded(
-                            child: ListView(
-                              children: prescriptions.map((prescription) {
-                                return ListTile(
-                                  title: Text(
-                                      "Medication: ${prescription.medicationName}"),
-                                  subtitle: Text(
-                                      "Dosage: ${prescription.dosage}, Frequency: ${prescription.frequency} Presciption Date: ${prescription.prescriptionDate}"),
-                                  // Add more details or actions as needed
-                                );
-                              }).toList(),
-                            ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: prescriptions.length,
+                            itemBuilder: (context, index) {
+                              Prescription prescription = prescriptions[index];
+
+                              return Card(
+                                elevation: 4,
+                                margin: EdgeInsets.symmetric(
+                                    vertical: 8, horizontal: 16),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      ListTile(
+                                        title: Text(
+                                            "Prescription Date: ${prescription.prescriptionDate}",
+                                            style: const TextStyle(
+                                                fontSize: 23,
+                                                fontWeight: FontWeight.bold)),
+                                        subtitle: Text(
+                                          "Medication: ${prescription.medicationName} Dosage: ${prescription.dosage}, Frequency: ${prescription.frequency} Prescription Date: ${prescription.prescriptionDate}",
+                                        ),
+                                        // Add more details or actions as needed
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: () async {
+                                              final AuthService authService =
+                                                  AuthService();
+                                              final PetService _petService =
+                                                  PetService(
+                                                      uid: authService.uid!);
+                                              // Fetch the prescription details when the button is pressed
+                                              var petname = await _petService
+                                                  .getPetNameByUid(
+                                                      prescription.petUid);
+                                              Prescription?
+                                                  selectedPrescription =
+                                                  await _prescriptionService
+                                                      .viewPrescriptionByUid(
+                                                          prescription.petUid);
+                                              print(selectedPrescription);
+
+                                              if (selectedPrescription !=
+                                                  null) {
+                                                // Navigate to the next widget passing the selected prescription
+                                                // ignore: use_build_context_synchronously
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        PrescriptionDetail(
+                                                      prescription:
+                                                          selectedPrescription,
+                                                      petname: petname,
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              foregroundColor: Colors.white,
+                                              backgroundColor:
+                                                  Colors.blue, // Text color
+                                            ),
+                                            child: const Text('View'),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       );
                     }
                   },
-                ),
-              )
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -513,13 +636,13 @@ void showChatDialog(BuildContext context) {
                                       fontSize: 10,
                                     ),
                                   ),
-                                  SizedBox(height: 5.0),
+                                  const SizedBox(height: 5.0),
                                   Text(
                                     messages[index].messageContent,
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 10,
+                                      fontSize: 15,
                                     ),
                                   ),
                                 ],
@@ -547,12 +670,47 @@ void showChatDialog(BuildContext context) {
                   if (message.isNotEmpty) {
                     await chatService.sendMessageToDoctor(message);
                     _messageController.clear();
+                    final UserService userService =
+                        UserService(uid: authService.uid!);
+
+                    bool hasOnlineDoctors =
+                        await userService.hasOnlineDoctors();
+                    if (!hasOnlineDoctors) {
+                      try {
+                        String userDetail = await userService
+                            .getUserDetailById(authService.uid!);
+
+                        if (userDetail.isNotEmpty) {
+                          String msg = '''
+        "Hi $userDetail, thanks for contacting us.
+        We've received your message and appreciate you reaching out. 
+        We are currently busy or the doctor is not online, but we will get back to you as soon as we can.
+        Clinic Hours: 8AM to 4PM
+        OPEN: MONDAY - FRIDAY
+        CLOSED: SATURDAY & SUNDAY 
+        Stay safe & God Bless! 😉 "
+      ''';
+
+                          await chatService.sendMessageToClient(
+                              authService.uid!, msg);
+                        } else {
+                          // Handle the case where userDetail is an empty string
+                          print('User details not available.');
+                        }
+                      } catch (e) {
+                        // Handle the exception if any occurs during the process
+                        print('Error: $e');
+                      }
+                    } else {
+                      // No online doctors
+                      print('There are online doctors.');
+                    }
                   }
                 },
                 child: Text('Send'),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.blue,
-                  onPrimary: Colors.white,
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.blue,
                 ),
               ),
             ],
