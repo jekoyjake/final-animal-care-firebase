@@ -1,3 +1,5 @@
+import 'dart:core';
+
 import 'package:animalcare/models/user.dart';
 import 'package:animalcare/services/user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

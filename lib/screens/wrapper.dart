@@ -46,7 +46,7 @@ class Wrapper extends StatelessWidget {
               return Text('Unknown role: $userRole');
             }
           } else {
-            return Authenticate();
+            return LandingPage();
           }
         }
       },

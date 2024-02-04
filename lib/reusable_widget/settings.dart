@@ -76,12 +76,31 @@ class _SettingsState extends State<Settings> {
     }
   }
 
+  Future<Uint8List?> xFileToUint8List(XFile file) async {
+    try {
+      Uint8List? uint8list;
+
+      // Read file as bytes
+      final List<int> fileBytes = await file.readAsBytes();
+
+      // Convert bytes to Uint8List
+      if (fileBytes.isNotEmpty) {
+        uint8list = Uint8List.fromList(fileBytes);
+      }
+
+      return uint8list;
+    } catch (e) {
+      print('Error converting XFile to Uint8List: $e');
+      return null;
+    }
+  }
+
   Future<void> _getImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      var converted = await fileToUint8List(pickedFile as PlatformFile);
+      var converted = await xFileToUint8List(pickedFile);
       setState(() {
         _imageBytes = converted;
       });
@@ -158,9 +177,11 @@ class _SettingsState extends State<Settings> {
       appBar: AppBar(
         title: Text('Edit User Info'),
         actions: [
-          Text("Change Passoword"),
           IconButton(
-            icon: Icon(Icons.lock),
+            icon: Icon(
+              Icons.lock,
+              size: 40.0,
+            ),
             onPressed: () async {
               await _showChangePasswordDialog(context);
             },
@@ -265,50 +286,77 @@ class _SettingsState extends State<Settings> {
     TextEditingController newPasswordController = TextEditingController();
     final AuthService _auth = AuthService();
 
+    bool isLoading = false; // To track whether password change is in progress
+    String errorMessage = ''; // To store any error message
+
     await showDialog<void>(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Change Password'),
-          content: Column(
-            children: [
-              TextField(
-                controller: oldPasswordController,
-                decoration: InputDecoration(labelText: 'Old Password'),
-                obscureText: true,
+        return StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return AlertDialog(
+              title: Text('Change Password'),
+              content: Column(
+                children: [
+                  TextField(
+                    controller: oldPasswordController,
+                    decoration: InputDecoration(labelText: 'Old Password'),
+                    obscureText: true,
+                  ),
+                  TextField(
+                    controller: newPasswordController,
+                    decoration: InputDecoration(labelText: 'New Password'),
+                    obscureText: true,
+                  ),
+                  if (errorMessage.isNotEmpty)
+                    Text(
+                      errorMessage,
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  if (isLoading) CircularProgressIndicator(),
+                ],
               ),
-              TextField(
-                controller: newPasswordController,
-                decoration: InputDecoration(labelText: 'New Password'),
-                obscureText: true,
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                // Call your changePassword function with the entered values
-                _changePassword(
-                  oldPasswordController.text,
-                  newPasswordController.text,
-                );
-                Navigator.of(context).pop();
-              },
-              child: Text('Change'),
-            ),
-          ],
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      setState(() {
+                        isLoading = true;
+                        errorMessage = '';
+                      });
+                      await _changePassword(
+                        oldPasswordController.text,
+                        newPasswordController.text,
+                      );
+                      Navigator.of(context).pop();
+                    } catch (e) {
+                      setState(() {
+                        errorMessage =
+                            'Error changing password: Old Password is incorrect';
+                      });
+                    } finally {
+                      setState(() {
+                        isLoading = false;
+                      });
+                    }
+                  },
+                  child: Text('Change'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
   }
 
-  void _changePassword(String oldPassword, String newPassword) {
-    _authService.changePassword(oldPassword, newPassword);
+  Future<void> _changePassword(String oldPassword, String newPassword) async {
+    await _authService.changePassword(oldPassword, newPassword);
   }
 }

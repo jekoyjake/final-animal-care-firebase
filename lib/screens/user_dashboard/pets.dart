@@ -1,7 +1,9 @@
 import 'package:animalcare/models/message.dart';
 import 'package:animalcare/models/notification.dart';
 import 'package:animalcare/models/prescription.dart';
+import 'package:animalcare/screens/user_dashboard/landing_page.dart';
 import 'package:animalcare/screens/user_dashboard/pres_detail.dart';
+import 'package:animalcare/screens/wrapper.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/chat_service.dart';
 import 'package:animalcare/services/notif.dart';
@@ -13,13 +15,18 @@ import 'package:flutter/material.dart';
 import 'package:animalcare/models/pet.dart';
 import 'package:animalcare/screens/add_pet.dart';
 
-class PetDash extends StatelessWidget {
+class PetDash extends StatefulWidget {
   final void Function(int) onItemTapped;
 
   PetDash({Key? key, required this.onItemTapped});
 
+  @override
+  State<PetDash> createState() => _PetDashState();
+}
+
+class _PetDashState extends State<PetDash> {
   void handleTileTap(int index) {
-    onItemTapped(index);
+    widget.onItemTapped(index);
   }
 
   @override
@@ -51,7 +58,12 @@ class PetDash extends StatelessWidget {
                     Icons.home,
                     size: 50,
                   ),
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => LandingPage()),
+                    );
+                  },
                 ),
                 Stack(
                   children: [
@@ -118,6 +130,11 @@ class PetDash extends StatelessWidget {
                   ),
                   onPressed: () {
                     // Handle logout logic
+                    authService.signOut();
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const Wrapper()),
+                    );
                   },
                 ),
               ],
@@ -215,6 +232,13 @@ class PetDash extends StatelessWidget {
                   "Breed: ${pet.breed}",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
+                ElevatedButton(
+                  onPressed: () {
+                    _showRemovePetConfirmationDialog(context, pet);
+                    setState(() {});
+                  },
+                  child: Text('Remove Pet'),
+                ),
               ]),
             ),
           ],
@@ -285,10 +309,10 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
                                 widget.pet.photoUrl,
                                 fit: BoxFit.cover,
                                 height: MediaQuery.of(context).size.height < 600
-                                    ? 200.0
+                                    ? 150.0
                                     : 400,
                                 width: MediaQuery.of(context).size.height < 600
-                                    ? 200.0
+                                    ? 150.0
                                     : 400,
                               ),
                             ),
@@ -307,19 +331,26 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
                               ],
                             ),
                             const SizedBox(height: 60.0),
-                            // Add more details as needed
+                            ElevatedButton(
+                              onPressed: () {
+                                _showRemovePetConfirmationDialog(
+                                    context, widget.pet);
+                              },
+                              child: const Text('Remove Pet'),
+                            ),
                           ],
                         ),
                       )
                     : Container(
-                        width: MediaQuery.of(context).size.width *
-                            0.8, // Adjust the width as needed
+                        width: MediaQuery.of(context).size.width * 0.8,
                         constraints: BoxConstraints(
                           maxHeight: MediaQuery.of(context).size.height *
                               0.6, // Set max height
                         ),
                         decoration: BoxDecoration(
-                            color: Colors.white70, border: Border.all()),
+                          color: Colors.white70,
+                          border: Border.all(),
+                        ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -327,21 +358,23 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
                               child: Image.network(
                                 widget.pet.photoUrl,
                                 fit: BoxFit.cover,
-                                height: 150.0,
-                                width: 150.0,
+                                height: MediaQuery.of(context).size.height < 600
+                                    ? 100.0
+                                    : 400,
+                                width: MediaQuery.of(context).size.height < 600
+                                    ? 100.0
+                                    : 400,
                               ),
                             ),
-                            const SizedBox(height: 16.0),
                             Text(
                               "Species: ${widget.pet.species}",
-                              style: const TextStyle(fontSize: 18.0),
+                              style: const TextStyle(fontSize: 25.0),
                             ),
                             const SizedBox(height: 8.0),
                             Text(
                               "Breed: ${widget.pet.breed}",
-                              style: const TextStyle(fontSize: 18.0),
+                              style: const TextStyle(fontSize: 25.0),
                             ),
-                            // Add more details as needed
                           ],
                         ),
                       ),
@@ -461,6 +494,46 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
         ),
       ),
     );
+  }
+}
+
+Future<void> _showRemovePetConfirmationDialog(
+    BuildContext context, PetModel pet) async {
+  return showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Delete Pet'),
+        content: Text('Are you sure you want to delete ${pet.name}?'),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Dismiss the dialog
+            },
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _deletePet(pet);
+              Navigator.of(context).pop(); // Dismiss the dialog
+            },
+            child: Text('Delete'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+Future<void> _deletePet(PetModel pet) async {
+  final AuthService authService = AuthService();
+  try {
+    // Implement your logic to delete the pet, for example:
+    await PetService(uid: authService.uid!).removePet(pet.id);
+    // You may want to navigate back to the previous screen or update the UI accordingly.
+  } catch (e) {
+    print('Error deleting pet: $e');
+    // Handle the error as needed, for example, show an error message to the user.
   }
 }
 

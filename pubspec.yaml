@@ -44,6 +44,9 @@ dependencies:
   cached_network_image:
   flutter_form_builder:
   pdf:
+  url_launcher: ^6.0.13
+
+
 
 
 

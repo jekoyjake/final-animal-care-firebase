@@ -86,12 +86,31 @@ class _AddPetScreenState extends State<AddPetScreen> {
     }
   }
 
+  Future<Uint8List?> xFileToUint8List(XFile file) async {
+    try {
+      Uint8List? uint8list;
+
+      // Read file as bytes
+      final List<int> fileBytes = await file.readAsBytes();
+
+      // Convert bytes to Uint8List
+      if (fileBytes.isNotEmpty) {
+        uint8list = Uint8List.fromList(fileBytes);
+      }
+
+      return uint8list;
+    } catch (e) {
+      print('Error converting XFile to Uint8List: $e');
+      return null;
+    }
+  }
+
   Future<void> _getImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      var converted = await fileToUint8List(pickedFile as PlatformFile);
+      var converted = await xFileToUint8List(pickedFile);
       setState(() {
         _imageBytes = converted;
       });

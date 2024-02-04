@@ -132,7 +132,7 @@ class _AuthenticateState extends State<Authenticate> {
                                         isButtonDisabled =
                                             false; // Enable the button again
                                       });
-                                      Navigator.push(
+                                      Navigator.pushReplacement(
                                         context,
                                         MaterialPageRoute(
                                             builder: (context) =>

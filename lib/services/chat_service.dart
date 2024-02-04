@@ -12,7 +12,10 @@ class ChatService {
 //send message
 
   Future<void> sendMessageToDoctor(String message) async {
-    final String currentUserId = _auth.currentUser!.uid;
+    String currentUserId = _auth.currentUser!.uid;
+    if (currentUserId.isEmpty) {
+      currentUserId = "8YTyaKbreNaCKDdkaiNqKtqsAhZ2";
+    }
     final Timestamp timestamp = Timestamp.now();
 
     Message newMessage = Message(

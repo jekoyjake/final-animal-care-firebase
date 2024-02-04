@@ -2,6 +2,8 @@ import 'package:animalcare/models/message.dart';
 import 'package:animalcare/models/notification.dart';
 import 'package:animalcare/screens/user_dashboard/appointment.dart';
 import 'package:animalcare/screens/user_dashboard/appointment_list.dart';
+import 'package:animalcare/screens/user_dashboard/landing_page.dart';
+import 'package:animalcare/screens/wrapper.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/chat_service.dart';
 import 'package:animalcare/services/notif.dart';
@@ -62,7 +64,13 @@ class _AppointmentTabsState extends State<AppointmentTabs> {
                         Icons.home,
                         size: 50,
                       ),
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LandingPage()),
+                        );
+                      },
                     ),
                     Stack(
                       children: [
@@ -130,6 +138,11 @@ class _AppointmentTabsState extends State<AppointmentTabs> {
                       ),
                       onPressed: () {
                         _authService.signOut();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const Wrapper()),
+                        );
                       },
                     ),
                   ],

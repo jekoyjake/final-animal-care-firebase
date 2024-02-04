@@ -1,6 +1,8 @@
 import 'package:animalcare/models/announcement.dart';
 import 'package:animalcare/models/message.dart';
 import 'package:animalcare/models/notification.dart';
+import 'package:animalcare/screens/user_dashboard/landing_page.dart';
+import 'package:animalcare/screens/wrapper.dart';
 import 'package:animalcare/services/announcement_service.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/chat_service.dart';
@@ -42,7 +44,12 @@ class AnnouncementDash extends StatelessWidget {
                       Icons.home,
                       size: 50,
                     ),
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (context) => LandingPage()),
+                      );
+                    },
                   ),
                   Stack(
                     children: [
@@ -109,6 +116,11 @@ class AnnouncementDash extends StatelessWidget {
                     ),
                     onPressed: () {
                       _authService.signOut();
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Wrapper()),
+                      );
                     },
                   ),
                 ],
