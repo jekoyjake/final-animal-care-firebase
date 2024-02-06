@@ -1,4 +1,5 @@
 import 'package:animalcare/reusable_widget/doctor_drawer.dart';
+import 'package:animalcare/reusable_widget/doctor_drawer_mobile.dart';
 import 'package:animalcare/reusable_widget/settings.dart';
 import 'package:animalcare/screens/doctor_dashboard/appointmentfordoc.dart';
 import 'package:animalcare/screens/doctor_dashboard/list_user.dart';
@@ -14,6 +15,9 @@ class DoctorDashboard extends StatefulWidget {
 }
 
 int selected = 0;
+bool isMobile(BuildContext context) {
+  return MediaQuery.of(context).size.width < 600;
+}
 
 class _DoctorDashboardState extends State<DoctorDashboard> {
   Widget _buildSelectedWidget() {
@@ -34,13 +38,21 @@ class _DoctorDashboardState extends State<DoctorDashboard> {
   @override
   Widget build(BuildContext context) {
     return Row(children: [
-      DoctorDrawer(
-        onItemTapped: (index) {
-          setState(() {
-            selected = index;
-          });
-        },
-      ),
+      isMobile(context)
+          ? DoctorDrawerMob(
+              onItemTapped: (index) {
+                setState(() {
+                  selected = index;
+                });
+              },
+            )
+          : DoctorDrawer(
+              onItemTapped: (index) {
+                setState(() {
+                  selected = index;
+                });
+              },
+            ),
       //create a logic, when selected variable is changes, it will return a widget
       Expanded(child: _buildSelectedWidget())
     ]);

@@ -42,6 +42,9 @@ class AppointmentListForUser extends StatelessWidget {
                   itemCount: appointments.length,
                   itemBuilder: (context, index) {
                     AppointmentModel appointment = appointments[index];
+                    Future<String> petName =
+                        PetService(uid: authService.uid ?? "")
+                            .getPetNameByUid(appointment.petId);
                     return Card(
                       margin: EdgeInsets.all(8.0),
                       child: ListTile(
@@ -246,11 +249,12 @@ class AppointmentListForUser extends StatelessWidget {
                       itemCount: appointments.length,
                       itemBuilder: (context, index) {
                         AppointmentModel appointment = appointments[index];
+                        String petName = PetService(uid: authService.uid ?? "")
+                            .getPetNameByUid(appointment.petId) as String;
                         return Card(
                           margin: EdgeInsets.all(8.0),
                           child: ListTile(
-                            title: Text(
-                                "${appointment.status}  ${appointment.petId}"),
+                            title: Text("${appointment.status} -  ${petName}"),
                             subtitle: Text(
                               "${DateFormat('MMMM d, y \'at\' h:mm a').format(appointment.appointmentDate)}",
                             ),

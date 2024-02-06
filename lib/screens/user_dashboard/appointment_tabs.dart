@@ -406,8 +406,8 @@ void showChatDialog(BuildContext context) {
                         await userService.hasOnlineDoctors();
                     if (!hasOnlineDoctors) {
                       try {
-                        String userDetail = await userService
-                            .getUserDetailById(authService.uid!);
+                        String userDetail =
+                            await userService.getUserDetailById();
 
                         if (userDetail.isNotEmpty) {
                           String msg = '''

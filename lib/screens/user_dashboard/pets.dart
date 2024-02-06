@@ -210,9 +210,12 @@ class _PetDashState extends State<PetDash> {
           children: [
             Expanded(
               child: ClipRRect(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(10.0)),
+                borderRadius:
+                    const BorderRadius.vertical(top: Radius.circular(10.0)),
                 child: Image.network(
                   pet.photoUrl,
+                  width: 130,
+                  height: 130,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -341,42 +344,25 @@ class _PetDetailScreenState extends State<PetDetailScreen> {
                           ],
                         ),
                       )
-                    : Container(
-                        width: MediaQuery.of(context).size.width * 0.8,
-                        constraints: BoxConstraints(
-                          maxHeight: MediaQuery.of(context).size.height *
-                              0.6, // Set max height
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white70,
-                          border: Border.all(),
-                        ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            ClipOval(
-                              child: Image.network(
-                                widget.pet.photoUrl,
-                                fit: BoxFit.cover,
-                                height: MediaQuery.of(context).size.height < 600
-                                    ? 100.0
-                                    : 400,
-                                width: MediaQuery.of(context).size.height < 600
-                                    ? 100.0
-                                    : 400,
-                              ),
-                            ),
-                            Text(
-                              "Species: ${widget.pet.species}",
-                              style: const TextStyle(fontSize: 25.0),
-                            ),
-                            const SizedBox(height: 8.0),
-                            Text(
-                              "Breed: ${widget.pet.breed}",
-                              style: const TextStyle(fontSize: 25.0),
-                            ),
-                          ],
-                        ),
+                    : Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.network(
+                            widget.pet.photoUrl,
+                            fit: BoxFit.cover,
+                            height: 200,
+                            width: 200,
+                          ),
+                          Text(
+                            "Species: ${widget.pet.species}",
+                            style: const TextStyle(fontSize: 25.0),
+                          ),
+                          const SizedBox(height: 8.0),
+                          Text(
+                            "Breed: ${widget.pet.breed}",
+                            style: const TextStyle(fontSize: 25.0),
+                          ),
+                        ],
                       ),
                 const SizedBox(width: 30),
                 // Right Container (Prescription list)
@@ -750,8 +736,8 @@ void showChatDialog(BuildContext context) {
                         await userService.hasOnlineDoctors();
                     if (!hasOnlineDoctors) {
                       try {
-                        String userDetail = await userService
-                            .getUserDetailById(authService.uid!);
+                        String userDetail =
+                            await userService.getUserDetailById();
 
                         if (userDetail.isNotEmpty) {
                           String msg = '''

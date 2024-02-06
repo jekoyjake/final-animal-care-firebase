@@ -64,6 +64,8 @@ class NotificationService {
     return _collectionReference
         .where('isAppoinment', isEqualTo: true)
         .where('forUserUid', isEqualTo: 'userId')
+        .orderBy('timestamp',
+            descending: true) // Sort by timestamp in descending order
         .snapshots()
         .map((QuerySnapshot querySnapshot) {
       return querySnapshot.docs

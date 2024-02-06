@@ -134,6 +134,21 @@ class AppointmentService {
     });
   }
 
+  Future<void> deleteAppointmentByPetId(String petId) async {
+    try {
+      // Query appointments by petId
+      QuerySnapshot querySnapshot =
+          await appointmentsCollection.where('petId', isEqualTo: petId).get();
+
+      // Iterate through each appointment and delete it
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      print('Error deleting appointments by petId: $e');
+    }
+  }
+
   Future<void> changeStatusByAppointmentId(
       String appointmentId, String newStatus) async {
     try {

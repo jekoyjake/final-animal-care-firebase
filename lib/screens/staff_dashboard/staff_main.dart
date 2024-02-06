@@ -12,12 +12,14 @@ class StaffMain extends StatefulWidget {
 
 class _StaffMainState extends State<StaffMain> {
   bool hasData = false;
+
   final AuthService _authService = AuthService();
   final NotificationService notificationService = NotificationService();
   void showNotifications(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
+        final bool isMobile = MediaQuery.of(context).size.width < 600;
         return AlertDialog(
           title: const Text('Notifications'),
           content: StreamBuilder<List<NotificationModel>>(

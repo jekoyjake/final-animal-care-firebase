@@ -18,7 +18,6 @@ class AppointmentDash extends StatefulWidget {
 }
 
 class _AppointmentDashState extends State<AppointmentDash> {
-  DateTime _selectedDate = DateTime.now();
   DateTime? selectedDate;
   bool hasError = false;
   bool isLoading = false;
@@ -26,7 +25,7 @@ class _AppointmentDashState extends State<AppointmentDash> {
   String? sucmsg;
   String? errmsg;
   bool subHasErr = false;
-
+  DateTime _selectedDate = DateTime.now();
   String msg = "Please select 8:00 AM to 5:00 PM only";
   DateTime getNextSelectableWeekday(DateTime date) {
     // Skip weekends (Saturday and Sunday) to find the next selectable weekday
@@ -271,8 +270,10 @@ class _AppointmentDashState extends State<AppointmentDash> {
                                         setState(() {
                                           sucmsg = res;
                                         });
+                                        var user = await userService
+                                            .getUserDetailById();
                                         var msg =
-                                            "You have recieve appointment request from ${userService.getUserDetailById(_authService.uid!)}";
+                                            "You have recieve appointment request from ${await userService.getUserDetailById()}";
                                         await _noftifservice
                                             .addAppointmentNotification(
                                                 _authService.uid!,

@@ -33,6 +33,7 @@ class _AddPetScreenState extends State<AddPetScreen> {
   bool isLoading = false;
   bool isOthers = false;
   bool isWeb = kIsWeb;
+  String errM = "";
 
   void _submit() async {
     if (_formKey.currentState!.validate()) {
@@ -341,7 +342,17 @@ class _AddPetScreenState extends State<AddPetScreen> {
               !isLoading
                   ? ElevatedButton(
                       onPressed: () {
-                        _submit();
+                        if (_imageBytes == null || _imageBytes!.isEmpty) {
+                          setState(() {
+                            sucmsg = "";
+                            errM = "Please select an image for your pet";
+                          });
+                        } else {
+                          setState(() {
+                            errM = "";
+                          });
+                          _submit();
+                        }
                       },
                       child: const Text('Submit'),
                     )
@@ -356,6 +367,12 @@ class _AddPetScreenState extends State<AddPetScreen> {
                 sucmsg,
                 style: const TextStyle(
                   color: Colors.green,
+                ),
+              ),
+              Text(
+                errM,
+                style: const TextStyle(
+                  color: Colors.red,
                 ),
               )
             ],

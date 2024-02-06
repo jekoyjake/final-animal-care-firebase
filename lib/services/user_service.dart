@@ -50,9 +50,30 @@ class UserService {
     }
   }
 
-  Future<String> getUserDetailById(String uId) async {
+  Future<String> getUserDetailById() async {
     try {
-      DocumentSnapshot userSnapshot = await userCollection.doc(uId).get();
+      DocumentSnapshot userSnapshot = await userCollection.doc(uid).get();
+
+      if (userSnapshot.exists) {
+        Map<String, dynamic> userData =
+            userSnapshot.data() as Map<String, dynamic>;
+
+        String firstName = userData['firstname'] ?? '';
+        String lastName = userData['lastname'] ?? '';
+
+        return "$firstName $lastName";
+      } else {
+        return "";
+      }
+    } catch (e) {
+      print('Error getting user by ID: $e');
+      throw e;
+    }
+  }
+
+  Future<String> getUserDetailsById(String userId) async {
+    try {
+      DocumentSnapshot userSnapshot = await userCollection.doc(userId).get();
 
       if (userSnapshot.exists) {
         Map<String, dynamic> userData =

@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:animalcare/models/pet.dart';
+import 'package:animalcare/services/appointment_service.dart';
+import 'package:animalcare/services/patient_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
@@ -11,6 +13,9 @@ class PetService {
 
   final CollectionReference petCollection =
       FirebaseFirestore.instance.collection('pets');
+
+  final AppointmentService appointmentService = AppointmentService();
+  final PatientService patientService = PatientService();
 
   Future<String> _uploadImage(Uint8List imageFile) async {
     try {
@@ -42,6 +47,37 @@ class PetService {
     } catch (e) {
       print("Error getting pet name by UID: $e");
       return e.toString();
+    }
+  }
+
+  Future<PetModel?> getPet(String petId) async {
+    try {
+      // Fetch the document for the specified petId
+      DocumentSnapshot documentSnapshot = await petCollection.doc(petId).get();
+
+      // Check if the document exists
+      if (documentSnapshot.exists) {
+        Map<String, dynamic> data =
+            documentSnapshot.data() as Map<String, dynamic>;
+
+        // Convert the data to a PetModel object
+        return PetModel(
+          id: documentSnapshot.id,
+          name: data['name'] ?? '',
+          species: data['species'] ?? '',
+          age: data['age'] ?? 0,
+          breed: data['breed'] ?? '',
+          photoUrl: data['photoUrl'] ?? '',
+          ownerUid: data['ownerUid'] ?? '',
+        );
+      } else {
+        // If the document does not exist, return null
+        return null;
+      }
+    } catch (e) {
+      // Handle errors
+      print('Error getting pet by ID: $e');
+      rethrow; // Rethrow the exception for higher-level handling
     }
   }
 
@@ -166,10 +202,26 @@ class PetService {
     }
   }
 
+  Future<String?> getPetId(String petUid) async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('pets')
+        .where('petUid', isEqualTo: petUid)
+        .get();
+
+    if (querySnapshot.docs.isNotEmpty) {
+      // Assuming petUid is unique, we'll only have one result
+      return querySnapshot.docs.first.id;
+    } else {
+      return null;
+    }
+  }
+
   Future<String> removePet(String petId) async {
+    var getId = await getPetId(petId);
     try {
       // Delete the pet from Firestore
       await petCollection.doc(petId).delete();
+
       return "Pet Successfuly deleted";
     } catch (e) {
       // Handle errors

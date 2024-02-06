@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class NotificationModel {
   String? posterUid;
   bool isAppoinment;
@@ -6,13 +8,14 @@ class NotificationModel {
   String? forUserUid;
   String notifMsg;
 
-  NotificationModel(
-      {this.posterUid,
-      required this.isAppoinment,
-      required this.isAnnouncment,
-      required this.read,
-      this.forUserUid,
-      required this.notifMsg});
+  NotificationModel({
+    this.posterUid,
+    required this.isAppoinment,
+    required this.isAnnouncment,
+    required this.read,
+    this.forUserUid,
+    required this.notifMsg,
+  });
 
   Map<String, dynamic> toMap() {
     return {
@@ -21,7 +24,7 @@ class NotificationModel {
       'isAnnouncment': isAnnouncment,
       'read': read,
       'forUserUid': forUserUid,
-      'notifMsg': notifMsg
+      'notifMsg': notifMsg,
     };
   }
 

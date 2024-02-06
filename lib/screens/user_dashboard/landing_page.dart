@@ -2,11 +2,14 @@ import 'package:animalcare/screens/authenticate.dart';
 import 'package:animalcare/screens/user_dashboard.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
+// ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 
 class LandingPage extends StatefulWidget {
+  const LandingPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _LandingPageState createState() => _LandingPageState();
 }
 
@@ -26,7 +29,7 @@ class _LandingPageState extends State<LandingPage>
 
   @override
   Widget build(BuildContext context) {
-    final AuthService _authserv = AuthService();
+    final AuthService authserv = AuthService();
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -35,11 +38,11 @@ class _LandingPageState extends State<LandingPage>
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             isMobile(context)
-                ? SizedBox(
+                ? const SizedBox(
                     child:
                         Text('Animal Care', style: TextStyle(fontSize: 20.0)),
                   )
-                : Expanded(
+                : const Expanded(
                     child:
                         Text('Animal Care', style: TextStyle(fontSize: 24.0)),
                   ),
@@ -52,7 +55,7 @@ class _LandingPageState extends State<LandingPage>
                 ],
               ),
             ),
-            _authserv.uid != null
+            authserv.uid != null
                 ? IconButton(
                     icon: const Icon(
                       Icons.dashboard,
@@ -80,7 +83,7 @@ class _LandingPageState extends State<LandingPage>
         ),
         child: TabBarView(
           controller: _tabController,
-          children: [
+          children: const [
             // Home Tab
             HomeTab(),
             // About Us Tab
@@ -101,14 +104,16 @@ void _launchURL() async {
 }
 
 class HomeTab extends StatelessWidget {
+  const HomeTab({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final AuthService _authService = AuthService();
+    final AuthService authService = AuthService();
     final bool isMobile = MediaQuery.of(context).size.width < 600;
     return Padding(
-      padding: EdgeInsets.all(15.0),
+      padding: const EdgeInsets.all(15.0),
       child: isMobile
-          ? Container(
+          ? SizedBox(
               width: 360,
               height: 200,
               child: Column(
@@ -156,13 +161,13 @@ class HomeTab extends StatelessWidget {
                           const SizedBox(
                             height: 20,
                           ),
-                          _authService.uid != null
+                          authService.uid != null
                               ? Container()
                               : ElevatedButton.icon(
                                   onPressed: () {
                                     _launchURL();
                                   },
-                                  icon: Icon(Icons.download, size: 24),
+                                  icon: const Icon(Icons.download, size: 24),
                                   label: const Text(
                                     'Download Android App',
                                     style: TextStyle(color: Colors.white),
@@ -173,7 +178,7 @@ class HomeTab extends StatelessWidget {
                                   ),
                                 ),
                           const SizedBox(height: 20),
-                          _authService.uid != null
+                          authService.uid != null
                               ? Container()
                               : ElevatedButton(
                                   onPressed: () {
@@ -186,7 +191,7 @@ class HomeTab extends StatelessWidget {
                                       ),
                                     );
                                   },
-                                  child: Text('Login'),
+                                  child: const Text('Login'),
                                 ),
                         ],
                       ),
@@ -200,7 +205,7 @@ class HomeTab extends StatelessWidget {
                 // First Row: Stack of 2 Pictures
                 Expanded(
                   flex: 2, // Adjust the flex value based on your layout needs
-                  child: Container(
+                  child: SizedBox(
                     height: 700,
                     child: Stack(
                       children: [
@@ -258,20 +263,6 @@ class HomeTab extends StatelessWidget {
                       const SizedBox(
                         height: 20,
                       ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          _launchURL();
-                        },
-                        icon: Icon(Icons.download, size: 24),
-                        label: const Text(
-                          'Download Android App',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(
-                              0xFF6665FE), // Set the button color to blue
-                        ),
-                      ),
                       const SizedBox(height: 20),
                       ElevatedButton(
                         onPressed: () {
@@ -283,7 +274,7 @@ class HomeTab extends StatelessWidget {
                             ),
                           );
                         },
-                        child: Text('Login'),
+                        child: const Text('Login'),
                       ),
                     ],
                   ),
@@ -295,19 +286,21 @@ class HomeTab extends StatelessWidget {
 }
 
 class AboutUsTab extends StatelessWidget {
+  const AboutUsTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Padding(
-      padding: EdgeInsets.all(15.0),
+      padding: const EdgeInsets.all(15.0),
       child: isMobile
           ? Column(
               children: [
                 // First Row: Stack of 2 Pictures
                 Expanded(
                   flex: 2,
-                  child: Container(
+                  child: SizedBox(
                     height: 700,
                     child: Stack(
                       children: [
@@ -336,7 +329,7 @@ class AboutUsTab extends StatelessWidget {
                   ),
                 ),
                 // Second Row: Column of Mission and Vision
-                Expanded(
+                const Expanded(
                   flex: 1,
                   child: SingleChildScrollView(
                     child: Column(
@@ -348,18 +341,18 @@ class AboutUsTab extends StatelessWidget {
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
                         Text(
                           '"To provide compassionate and comprehensive veterinary care, promoting the well-being of pets and fostering lasting relationships with their owners. We are dedicated to delivering excellence in veterinary medicine, continuous education, and community outreach, ensuring the highest standards of health and happiness for all animals in our care."',
                           style: TextStyle(fontSize: 16),
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20),
                         Text(
                           'Vision:',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
                         Text(
                           "To be recognized as the premier veterinary clinic known for its unwavering commitment to exceptional care, innovation, and client satisfaction. We aspire to be a trusted partner in the health and happiness of pets, setting the standard for veterinary excellence and community engagement. Our vision is to create a world where every pet receives the best possible care, ensuring a lifetime of health, joy, and companionship.",
                           style: TextStyle(fontSize: 16),
@@ -375,7 +368,7 @@ class AboutUsTab extends StatelessWidget {
                 // First Row: Stack of 2 Pictures
                 Expanded(
                   flex: 2,
-                  child: Container(
+                  child: SizedBox(
                     height: 700,
                     child: Stack(
                       children: [
@@ -404,7 +397,7 @@ class AboutUsTab extends StatelessWidget {
                   ),
                 ),
                 // Second Row: Column of 2 Buttons and Mission/Vision
-                Expanded(
+                const Expanded(
                   flex: 1,
                   child: SingleChildScrollView(
                     child: Column(
@@ -416,18 +409,18 @@ class AboutUsTab extends StatelessWidget {
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
                         Text(
                           "To provide compassionate and comprehensive veterinary care, promoting the well-being of pets and fostering lasting relationships with their owners. We are dedicated to delivering excellence in veterinary medicine, continuous education, and community outreach, ensuring the highest standards of health and happiness for all animals in our care.",
                           style: TextStyle(fontSize: 16),
                         ),
-                        const SizedBox(height: 20),
+                        SizedBox(height: 20),
                         Text(
                           'Vision:',
                           style: TextStyle(
                               fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 10),
+                        SizedBox(height: 10),
                         Text(
                           "To be recognized as the premier veterinary clinic known for its unwavering commitment to exceptional care, innovation, and client satisfaction. We aspire to be a trusted partner in the health and happiness of pets, setting the standard for veterinary excellence and community engagement. Our vision is to create a world where every pet receives the best possible care, ensuring a lifetime of health, joy, and companionship.",
                           style: TextStyle(fontSize: 16),

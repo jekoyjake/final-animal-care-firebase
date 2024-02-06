@@ -1,6 +1,7 @@
 import 'package:animalcare/reusable_widget/my_drawer.dart';
 import 'package:animalcare/reusable_widget/settings.dart';
 import 'package:animalcare/reusable_widget/staff_drawer.dart';
+import 'package:animalcare/reusable_widget/staff_drawer_desktop.dart';
 import 'package:animalcare/screens/Staff_dashboard/Staff_main.dart';
 import 'package:animalcare/screens/doctor_dashboard/patient.dart';
 import 'package:animalcare/screens/doctor_dashboard/wakib_patient.dart';
@@ -36,14 +37,23 @@ class _StaffDashboardState extends State<StaffDashboard> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = MediaQuery.of(context).size.width < 600;
     return Row(children: [
-      StaffDrawer(
-        onItemTapped: (index) {
-          setState(() {
-            selected = index;
-          });
-        },
-      ),
+      isMobile
+          ? StaffDrawer(
+              onItemTapped: (index) {
+                setState(() {
+                  selected = index;
+                });
+              },
+            )
+          : StaffDrawerDesktop(
+              onItemTapped: (index) {
+                setState(() {
+                  selected = index;
+                });
+              },
+            ),
       //create a logic, when selected variable is changes, it will return a widget
       Expanded(child: _buildSelectedWidget())
     ]);
