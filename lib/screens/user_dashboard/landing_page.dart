@@ -103,6 +103,14 @@ void _launchURL() async {
   html.window.open(url, '_blank');
 }
 
+void _launchURLL() async {
+  const url =
+      'https://www.mediafire.com/file/ph39a1bl06ql56v/animal_care_1.0.0.apk/file'; // Replace with your actual link
+
+  // Open in a new tab for web
+  html.window.open(url, '_blank');
+}
+
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
 
@@ -158,9 +166,7 @@ class HomeTab extends StatelessWidget {
                           Explore our website to learn more about our services, meet our passionate team, and discover valuable resources for pet care. Whether you're a new pet parent or have been with us for years, AnimalCare is here to support you in providing the best possible life for your cherished companions.
                           
                           Thank you for choosing AnimalCare Veterinary Clinic. We look forward to caring for your pets and being a part of their happy and healthy journey."""),
-                          const SizedBox(
-                            height: 20,
-                          ),
+                          const SizedBox(height: 20),
                           authService.uid != null
                               ? Container()
                               : ElevatedButton.icon(
@@ -169,7 +175,24 @@ class HomeTab extends StatelessWidget {
                                   },
                                   icon: const Icon(Icons.download, size: 24),
                                   label: const Text(
-                                    'Download Android App',
+                                    'Download Android App Google Drive',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(
+                                        0xFF6665FE), // Set the button color to blue
+                                  ),
+                                ),
+                          const SizedBox(height: 20),
+                          authService.uid != null
+                              ? Container()
+                              : ElevatedButton.icon(
+                                  onPressed: () {
+                                    _launchURLL();
+                                  },
+                                  icon: const Icon(Icons.download, size: 24),
+                                  label: const Text(
+                                    'Download Android App Mediafire',
                                     style: TextStyle(color: Colors.white),
                                   ),
                                   style: ElevatedButton.styleFrom(
@@ -293,44 +316,39 @@ class AboutUsTab extends StatelessWidget {
     final bool isMobile = MediaQuery.of(context).size.width < 600;
 
     return Padding(
-      padding: const EdgeInsets.all(15.0),
+      padding: const EdgeInsets.all(5.0),
       child: isMobile
           ? Column(
               children: [
-                // First Row: Stack of 2 Pictures
-                Expanded(
-                  flex: 2,
-                  child: SizedBox(
-                    height: 700,
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          left: 0,
-                          top: 0,
-                          child: Image.asset(
-                            'assets/building.png',
-                            width: 600,
-                            height: 700,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        Positioned(
-                          left: 0,
-                          bottom: 0,
-                          child: Image.asset(
-                            'assets/dogs.png',
-                            width: 600,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/logo.png', // Make sure to use the correct path
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
                     ),
-                  ),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    Image.asset(
+                      'assets/lagunalogo.png', // Make sure to use the correct path
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
+                    ),
+                  ],
+                ),
+                // First Row: Stack of 2 Pictures
+                Image.asset(
+                  'assets/dogs.png', // Make sure to use the correct path
+                  width: 350,
+                  height: 100,
+                  fit: BoxFit.cover,
                 ),
                 // Second Row: Column of Mission and Vision
                 const Expanded(
-                  flex: 1,
                   child: SingleChildScrollView(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

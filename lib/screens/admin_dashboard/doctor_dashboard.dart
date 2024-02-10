@@ -25,14 +25,6 @@ class _DoctorDashboardAdminState extends State<DoctorDashboardAdmin> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.home),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {},
-          ),
-          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               _authService.signOut();
@@ -103,7 +95,7 @@ class _DoctorDashboardAdminState extends State<DoctorDashboardAdmin> {
           backgroundImage: NetworkImage(doctor.photoUrl ?? ''),
           radius: 25,
         ),
-        title: Text(doctor.firstname + ' ' + doctor.lastname),
+        title: Text('${doctor.firstname} ${doctor.lastname}'),
         subtitle: Text(doctor.role),
         // Add more doctor information here if needed
       ),

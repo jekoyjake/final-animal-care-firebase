@@ -59,6 +59,21 @@ class PrescriptionService {
     }
   }
 
+  Future<bool> hasPrescriptionByPetUid(String petUid) async {
+    try {
+      QuerySnapshot querySnapshot = await _prescriptionsCollection
+          .where('petUid', isEqualTo: petUid)
+          .limit(
+              1) // Limit to 1 document since we only need to check if any prescription exists
+          .get();
+
+      return querySnapshot.docs.isNotEmpty;
+    } catch (e) {
+      print('Error checking prescription by petUid: $e');
+      throw e;
+    }
+  }
+
   Future<Prescription?> viewPrescriptionByUid(String PetUid) async {
     try {
       QuerySnapshot querySnapshot = await _prescriptionsCollection

@@ -64,24 +64,31 @@ class AdminDrawer extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ListTile(
+                leading: const Icon(Icons.dashboard),
+                title: const Text("Dashboard"),
+                onTap: () =>
+                    handleTileTap(0), // Pass index 0 when Profile is tapped
+              ),
+              const SizedBox(height: 20),
+              ListTile(
                 leading: const Icon(Icons.person),
                 title: const Text("Doctors"),
                 onTap: () =>
-                    handleTileTap(0), // Pass index 0 when Profile is tapped
+                    handleTileTap(1), // Pass index 0 when Profile is tapped
               ),
               const SizedBox(height: 20),
               ListTile(
                 leading: const Icon(Icons.person_2),
                 title: const Text("Staff"),
                 onTap: () =>
-                    handleTileTap(1), // Pass index 0 when Profile is tapped
+                    handleTileTap(2), // Pass index 0 when Profile is tapped
               ),
               const SizedBox(height: 20),
               ListTile(
                 leading: const Icon(Icons.pets),
                 title: const Text("Announcements"),
                 onTap: () =>
-                    handleTileTap(2), // Pass index 1 when Pets is tapped
+                    handleTileTap(3), // Pass index 1 when Pets is tapped
               ),
               const SizedBox(height: 20),
               const Divider(

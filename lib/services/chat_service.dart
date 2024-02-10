@@ -1,15 +1,13 @@
 import 'package:animalcare/models/message.dart';
-import 'package:animalcare/services/auth_service.dart';
-import 'package:animalcare/services/user_service.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class ChatService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-//send message
 
   Future<void> sendMessageToDoctor(String message) async {
     String currentUserId = _auth.currentUser!.uid;
@@ -25,7 +23,6 @@ class ChatService {
       timestamp: timestamp,
     );
 
-    //Generate Chatroom ID
     List<String> ids = [currentUserId, "DOCTOR"];
     ids.sort();
     String chatRoomId = ids.join("_");
@@ -157,7 +154,9 @@ class ChatService {
       return querySnapshot.docs.isNotEmpty;
     } catch (error) {
       // Handle errors, e.g., log or throw an exception
-      print('Error checking messages: $error');
+      if (kDebugMode) {
+        print('Error checking messages: $error');
+      }
       return false;
     }
   }

@@ -5,12 +5,16 @@ class PatientModel {
   final String userUid;
   final String petUid;
   final DateTime appointmentDate;
+  bool isAppointed = false;
+  bool hasPrescription = false;
 
   PatientModel({
     required this.uId,
     required this.userUid,
     required this.petUid,
     required this.appointmentDate,
+    required this.hasPrescription,
+    required this.isAppointed,
   });
 
   factory PatientModel.fromFirestore(QueryDocumentSnapshot<Object?> doc) {
@@ -21,6 +25,8 @@ class PatientModel {
       petUid: data['petUid'] ?? '',
       appointmentDate:
           (data['appointmentDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      hasPrescription: data['hasPrescription'],
+      isAppointed: data['isAppointed'],
     );
   }
 }

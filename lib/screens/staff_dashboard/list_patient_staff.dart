@@ -3,6 +3,7 @@ import 'package:animalcare/models/notification.dart';
 import 'package:animalcare/models/patient.dart';
 import 'package:animalcare/models/pet.dart';
 import 'package:animalcare/models/prescription.dart';
+import 'package:animalcare/screens/staff_dashboard/medical_history.dart';
 import 'package:animalcare/screens/wrapper.dart';
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/notif.dart';
@@ -107,60 +108,26 @@ class _PatientDashboardStaffState extends State<PatientDashboardStaff> {
             const SizedBox(
               height: 20,
             ),
-            Container(
-              width: MediaQuery.of(context).size.width,
-              decoration:
-                  BoxDecoration(border: Border.all(color: Colors.black54)),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                child: FutureBuilder<List<ListTile>>(
-                  future: Future.wait(
-                    listOfPres.map((pres) async {
-                      return ListTile(
-                        leading: const Icon(Icons.medical_information),
-                        title: Text("Diagnosis: ${pres.dianosis}"),
-                        subtitle: Text(
-                            "Prescription date: ${DateFormat('MMMM d, y \'at\' h:mm a').format(patientModel.appointmentDate)}"),
-
-                        tileColor: Colors
-                            .transparent, // Adjust the tile color as needed
-                        onTap: () {
-                          // Handle item tap
-
-                          if (kDebugMode) {
-                            print('Item tapped');
-                          }
-                        },
-                      );
-                    }).toList(),
-                  ),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        ),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Text('Error: ${snapshot.error}');
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text('No medical history found');
-                    } else {
-                      return ListView.builder(
-                        itemCount: snapshot.data!.length,
-                        itemBuilder: (context, index) {
-                          return snapshot.data?[index];
-                        },
-                      );
-                    }
-                  },
-                ),
-              ),
-            )
           ]),
           actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MedicalHostory(
+                      listOfPres: listOfPres,
+                      patientModel: patientModel,
+                    ),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green, // Background color
+                // Elevation
+              ),
+              child: const Text("View Medical History"),
+            ),
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop(); // Close the dialog

@@ -222,13 +222,6 @@ class PrescriptionDetail extends StatelessWidget {
                             const Text("Provincial-Veterinarian-Signature"),
                           ],
                         ),
-                        const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: () {
-                            // Implement your print functionality here
-                          },
-                          child: const Text('Print Prescription'),
-                        ),
                       ],
                     ),
             ),

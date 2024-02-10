@@ -4,6 +4,7 @@ import 'package:animalcare/models/user.dart';
 import 'package:animalcare/services/user_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -28,7 +29,9 @@ class AuthService {
   Future<String?> getEmailByUid(String uid) async {
     try {
       DocumentSnapshot userSnapshot = await userCollection.doc(uid).get();
-      print(userSnapshot.data());
+      if (kDebugMode) {
+        print(userSnapshot.data());
+      }
 
       if (userSnapshot.exists) {
         String email = userSnapshot.get('email');
@@ -37,7 +40,9 @@ class AuthService {
         return null; // User with the provided UID not found
       }
     } catch (e) {
-      print("Error getting email by UID: $e");
+      if (kDebugMode) {
+        print("Error getting email by UID: $e");
+      }
       return null;
     }
   }
@@ -45,14 +50,10 @@ class AuthService {
   Stream<UserModel?> get user {
     return _auth.authStateChanges().asyncMap((User? user) async {
       if (user != null) {
-        print("naa");
-        print(user.uid);
         try {
           DocumentSnapshot userSnapshot =
               await userCollection.doc(user.uid).get();
           if (userSnapshot.exists) {
-            print(userSnapshot.get('role'));
-            // Fetch data and check for nullability
             String uid = user.uid;
             String? email = user.email;
             String firstname = userSnapshot.get('firstname') as String? ?? '';
@@ -79,7 +80,9 @@ class AuthService {
             );
           }
         } on FirebaseException catch (e) {
-          print('Error fetching user data: ${e.message}');
+          if (kDebugMode) {
+            print('Error fetching user data: ${e.message}');
+          }
         }
       }
       return null;
@@ -93,15 +96,15 @@ class AuthService {
       if (userSnapshot.exists) {
         String firstname = userSnapshot['firstname'];
 
-        String lastname = userSnapshot['lastname'];
-
-        return "${firstname} ${firstname} "; // or return any other data you need
+        return "$firstname $firstname "; // or return any other data you need
       } else {
         // User with the provided UID not found
         return "User";
       }
     } catch (e) {
-      print("Error getting user by UID: $e");
+      if (kDebugMode) {
+        print("Error getting user by UID: $e");
+      }
       return e.toString();
     }
   }
@@ -122,8 +125,8 @@ class AuthService {
         email: email,
         password: password,
       );
-      final UserService _userService = UserService(uid: _auth.currentUser!.uid);
-      await _userService.updateUserOnlineStatus(true);
+      final UserService userService = UserService(uid: _auth.currentUser!.uid);
+      await userService.updateUserOnlineStatus(true);
       return "200";
     } on FirebaseAuthException catch (e) {
       return e.message!;
@@ -167,9 +170,6 @@ class AuthService {
     String contactNo,
   ) async {
     try {
-      // Get the current user
-
-      // Add the doctor
       UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
         email: email,
@@ -195,6 +195,41 @@ class AuthService {
     }
   }
 
+  Future<String> addStaff(
+    String email,
+    String password,
+    String firstname,
+    String? middlename,
+    String lastname,
+    String address,
+    String contactNo,
+  ) async {
+    try {
+      UserCredential userCredential =
+          await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      if (userCredential.user != null) {
+        await UserService(uid: userCredential.user!.uid).addUser(
+          firstname,
+          "middlename",
+          lastname,
+          address,
+          "staff",
+          contactNo,
+        );
+      }
+
+      return "You have successfully added a staff!";
+    } on FirebaseAuthException catch (e) {
+      return e.message.toString();
+    } on FirebaseException catch (error) {
+      return error.message.toString();
+    }
+  }
+
   Future<void> changePassword(String oldPassword, String newPassword) async {
     try {
       // Get the current user
@@ -212,10 +247,14 @@ class AuthService {
         await user.updatePassword(newPassword);
       } else {
         // Handle the case when the user is not signed in
-        print('User is not signed in.');
+        if (kDebugMode) {
+          print('User is not signed in.');
+        }
       }
     } on FirebaseAuthException catch (e) {
-      print('Error changing password: ${e.message}');
+      if (kDebugMode) {
+        print('Error changing password: ${e.message}');
+      }
       rethrow; // Rethrow the exception for higher-level handling
     }
   }
@@ -231,7 +270,7 @@ class AuthService {
       if (e.code == 'user-not-found') {
         return false; // Email does not exist
       } else {
-        throw e; // Rethrow other exceptions
+        rethrow; // Rethrow other exceptions
       }
     }
   }
@@ -242,13 +281,15 @@ class AuthService {
   }
 
   Future<void> signOut() async {
-    final UserService _userService = UserService(uid: _auth.currentUser!.uid);
+    final UserService userService = UserService(uid: _auth.currentUser!.uid);
     try {
-      await _userService.updateUserOnlineStatus(false);
+      await userService.updateUserOnlineStatus(false);
 
       await _auth.signOut();
     } catch (e) {
-      print('Error signing out: $e');
+      if (kDebugMode) {
+        print('Error signing out: $e');
+      }
     }
   }
 
@@ -263,7 +304,9 @@ class AuthService {
         return null; // Email not found
       }
     } catch (e) {
-      print('Error getting UID by email: $e');
+      if (kDebugMode) {
+        print('Error getting UID by email: $e');
+      }
       return null;
     }
   }

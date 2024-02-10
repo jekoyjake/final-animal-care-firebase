@@ -2,8 +2,10 @@ import 'dart:typed_data';
 
 import 'package:animalcare/models/user.dart';
 import 'package:animalcare/services/chat_service.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 
 class UserService {
   final String uid;
@@ -67,6 +69,18 @@ class UserService {
       }
     } catch (e) {
       print('Error getting user by ID: $e');
+      throw e;
+    }
+  }
+
+  Future<int> totalUserCounts() async {
+    try {
+      QuerySnapshot querySnapshot =
+          await userCollection.where('role', isEqualTo: 'user').get();
+
+      return querySnapshot.docs.length;
+    } catch (e) {
+      print('Error counting users by role: $e');
       throw e;
     }
   }
@@ -317,4 +331,45 @@ class UserService {
       throw e;
     }
   }
+
+  Future<List<charts.Series<AddressCount, String>>>
+      getAddressCountsChart() async {
+    try {
+      QuerySnapshot querySnapshot = await userCollection
+          .where('role', isEqualTo: 'user') // Filter users by role
+          .get();
+
+      Map<String, int> addressCounts = {};
+      for (var doc in querySnapshot.docs) {
+        String address = doc.get('address') ?? 'Unknown';
+        addressCounts.update(address, (value) => value + 1, ifAbsent: () => 1);
+      }
+
+      List<AddressCount> data = addressCounts.entries.map((entry) {
+        return AddressCount(entry.key, entry.value);
+      }).toList();
+
+      return [
+        charts.Series<AddressCount, String>(
+          id: 'Address Counts',
+          domainFn: (AddressCount count, _) => count.address,
+          measureFn: (AddressCount count, _) => count.count,
+          data: data,
+          labelAccessorFn: (AddressCount count, _) => '${count.count}',
+        )
+      ];
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching address counts: $e');
+      }
+      rethrow;
+    }
+  }
+}
+
+class AddressCount {
+  final String address;
+  final int count;
+
+  AddressCount(this.address, this.count);
 }

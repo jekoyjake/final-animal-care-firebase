@@ -6,6 +6,7 @@ import 'package:animalcare/screens/staff_dashboard.dart';
 import 'package:animalcare/screens/user_dashboard.dart';
 import 'package:animalcare/screens/user_dashboard/landing_page.dart';
 import 'package:animalcare/services/auth_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class Wrapper extends StatelessWidget {
@@ -15,9 +16,8 @@ class Wrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     AuthService authService = AuthService();
 
-    void haha() async {
-      var eh = await authService.user.first;
-      print(eh);
+    void signOut() async {
+      await authService.signOut();
     }
 
     return StreamBuilder<UserModel?>(
@@ -32,7 +32,7 @@ class Wrapper extends StatelessWidget {
             ),
           );
         } else {
-          if (snapshot.hasData) {
+          if (snapshot.hasData && kIsWeb) {
             final userRole = snapshot.data!.role;
             if (userRole == "user") {
               return const UserDashboard();
@@ -45,8 +45,25 @@ class Wrapper extends StatelessWidget {
             } else {
               return Text('Unknown role: $userRole');
             }
+          } else if (snapshot.hasData && !kIsWeb) {
+            final userRole = snapshot.data!.role;
+            if (userRole == "user") {
+              return const UserDashboard();
+            } else if (userRole == "staff") {
+              signOut();
+              return const Center(child: Text("Please user the Web Version!"));
+            } else if (userRole == "admin") {
+              signOut();
+              return const Center(child: Text("Please user the Web Version!"));
+            } else if (userRole == "doctor") {
+              signOut();
+              return const Center(child: Text("Please user the Web Version!"));
+            } else {
+              signOut();
+              return Text('Unknown role: $userRole');
+            }
           } else {
-            return LandingPage();
+            return const LandingPage();
           }
         }
       },

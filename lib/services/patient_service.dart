@@ -1,5 +1,4 @@
 import 'package:animalcare/models/patient.dart';
-import 'package:animalcare/services/pet_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PatientService {
@@ -12,14 +11,19 @@ class PatientService {
     var uidd = _patientsCollection.doc().id;
 
     PatientModel patient = PatientModel(
-        uId: uidd,
-        userUid: userUid,
-        petUid: petUid,
-        appointmentDate: appointmentDate);
+      uId: uidd,
+      userUid: userUid,
+      petUid: petUid,
+      appointmentDate: appointmentDate,
+      hasPrescription: false,
+      isAppointed: false,
+    );
     await _patientsCollection.add({
       'userUid': patient.userUid,
       'petUid': patient.petUid,
       'appointmentDate': patient.appointmentDate,
+      'hasPrescription': patient.hasPrescription,
+      'isAppointed': patient.isAppointed
     });
   }
 
@@ -30,11 +34,12 @@ class PatientService {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
         return PatientModel(
-          uId: doc.id,
-          userUid: data['userUid'],
-          petUid: data['petUid'],
-          appointmentDate: (data['appointmentDate'] as Timestamp).toDate(),
-        );
+            uId: doc.id,
+            userUid: data['userUid'],
+            petUid: data['petUid'],
+            appointmentDate: (data['appointmentDate'] as Timestamp).toDate(),
+            hasPrescription: data['hasPrescription'],
+            isAppointed: data['isAppointed']);
       }).toList();
     });
   }
@@ -45,11 +50,12 @@ class PatientService {
     if (snapshot.exists) {
       Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
       return PatientModel(
-        uId: snapshot.id,
-        userUid: data['userUid'],
-        petUid: data['petUid'],
-        appointmentDate: (data['appointmentDate'] as Timestamp).toDate(),
-      );
+          uId: snapshot.id,
+          userUid: data['userUid'],
+          petUid: data['petUid'],
+          appointmentDate: (data['appointmentDate'] as Timestamp).toDate(),
+          hasPrescription: data['hasPrescription'],
+          isAppointed: data['isAppointed']);
     } else {
       return null;
     }
@@ -61,6 +67,8 @@ class PatientService {
       'userUid': updatedPatient.userUid,
       'petUid': updatedPatient.petUid,
       'appointmentDate': updatedPatient.appointmentDate,
+      'hasPrescription': updatedPatient.hasPrescription,
+      'isAppointed': updatedPatient.isAppointed
     });
   }
 
@@ -81,6 +89,58 @@ class PatientService {
       }
     } catch (e) {
       print('Error deleting patients by petUid: $e');
+    }
+  }
+
+  Future<void> updateIsAppointed(String uid, bool isAppointed) async {
+    try {
+      await _patientsCollection.doc(uid).update({
+        'isAppointed': isAppointed,
+      });
+    } catch (e) {
+      print('Error updating isAppointed: $e');
+      throw e;
+    }
+  }
+
+  Future<void> updateHasPrescription(String uid, bool hasPrescription) async {
+    try {
+      await _patientsCollection.doc(uid).update({
+        'hasPrescription': hasPrescription,
+      });
+    } catch (e) {
+      print('Error updating hasPrescription: $e');
+      throw e;
+    }
+  }
+
+  Future<bool> isAppointed(String uid) async {
+    try {
+      DocumentSnapshot snapshot = await _patientsCollection.doc(uid).get();
+      if (snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+        return data['isAppointed'] ?? false;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Error checking isAppointed: $e');
+      throw e;
+    }
+  }
+
+  Future<bool> hasPrescription(String uid) async {
+    try {
+      DocumentSnapshot snapshot = await _patientsCollection.doc(uid).get();
+      if (snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+        return data['hasPrescription'] ?? false;
+      } else {
+        return false;
+      }
+    } catch (e) {
+      print('Error checking hasPrescription: $e');
+      throw e;
     }
   }
 }

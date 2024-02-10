@@ -1,12 +1,9 @@
-import 'dart:math';
-import 'dart:typed_data';
+import 'dart:collection';
 
 import 'package:animalcare/models/appointment.dart';
-import 'package:animalcare/screens/user_dashboard/pets.dart';
 import 'package:animalcare/services/auth_service.dart';
-import 'package:animalcare/services/pet_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 
 class AppointmentService {
   final CollectionReference appointmentsCollection =
@@ -16,14 +13,6 @@ class AppointmentService {
   // Create a new appointment
   Future<String> addAppointment(DateTime dateTime, String petId) async {
     try {
-      DocumentReference appointmentRef = await appointmentsCollection.add({
-        'userUid': _authService.uid,
-        'appointmentDate': dateTime,
-        'status': 'Pending',
-        'seen': false,
-        'petId': petId,
-      });
-
       // Return the ID of the added appointment
       return "Appointment successfully added";
     } catch (e) {
@@ -49,7 +38,6 @@ class AppointmentService {
     }
   }
 
-  // Get all appointments for a specific user
   Stream<List<AppointmentModel>> getAppointmentsByUser(String userUid) {
     return appointmentsCollection
         .where('userUid', isEqualTo: userUid)
@@ -79,7 +67,9 @@ class AppointmentService {
         'petId': appointment.petId,
       });
     } catch (e) {
-      print('Error updating appointment: $e');
+      if (kDebugMode) {
+        print('Error updating appointment: $e');
+      }
     }
   }
 
@@ -88,7 +78,9 @@ class AppointmentService {
     try {
       await appointmentsCollection.doc(appointmentId).delete();
     } catch (e) {
-      print('Error deleting appointment: $e');
+      if (kDebugMode) {
+        print('Error deleting appointment: $e');
+      }
     }
   }
 
@@ -115,7 +107,6 @@ class AppointmentService {
   }
 
   Stream<List<AppointmentModel>> getAppointmentsByStatus(String status) {
-    print(status);
     return appointmentsCollection
         .where('status', isEqualTo: status)
         .snapshots()
@@ -145,7 +136,9 @@ class AppointmentService {
         await doc.reference.delete();
       }
     } catch (e) {
-      print('Error deleting appointments by petId: $e');
+      if (kDebugMode) {
+        print('Error deleting appointments by petId: $e');
+      }
     }
   }
 
@@ -156,7 +149,48 @@ class AppointmentService {
         'status': newStatus,
       });
     } catch (e) {
-      print('Error changing appointment status: $e');
+      if (kDebugMode) {
+        print('Error changing appointment status: $e');
+      }
+    }
+  }
+
+  Future<Map<DateTime, int>> getAppointmentDatesChartData(
+      DateTime selectedMonth) async {
+    try {
+      DateTime startOfMonth = DateTime(selectedMonth.year, selectedMonth.month);
+      DateTime endOfMonth =
+          DateTime(selectedMonth.year, selectedMonth.month + 1, 0);
+
+      QuerySnapshot querySnapshot = await appointmentsCollection
+          .where('appointmentDate', isGreaterThanOrEqualTo: startOfMonth)
+          .where('appointmentDate', isLessThanOrEqualTo: endOfMonth)
+          .get();
+
+      Map<DateTime, int> appointmentCounts = <DateTime, int>{};
+
+      // Initialize appointmentCounts with all days in the selected month
+      for (int i = 1; i <= endOfMonth.day; i++) {
+        appointmentCounts[
+            DateTime(selectedMonth.year, selectedMonth.month, i)] = 0;
+      }
+
+      for (var doc in querySnapshot.docs) {
+        DateTime appointmentDate =
+            (doc['appointmentDate'] as Timestamp).toDate();
+        DateTime dateWithoutTime = DateTime(
+            appointmentDate.year, appointmentDate.month, appointmentDate.day);
+
+        // Increment the count for the respective date
+        appointmentCounts.update(dateWithoutTime, (value) => value + 1,
+            ifAbsent: () => 1);
+      }
+      return appointmentCounts;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching appointment dates chart data: $e');
+      }
+      rethrow;
     }
   }
 }

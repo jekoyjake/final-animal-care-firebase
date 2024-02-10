@@ -1,12 +1,14 @@
 import 'package:animalcare/services/auth_service.dart';
+import 'package:animalcare/services/patient_service.dart';
 import 'package:flutter/material.dart';
 import 'package:animalcare/services/prescription_service.dart';
 import 'package:intl/intl.dart';
 
 class AddPrescriptionWidget extends StatefulWidget {
   final String petUid; // Assuming you need the pet UID for adding prescriptions
+  final String patientUid;
 
-  AddPrescriptionWidget({required this.petUid});
+  AddPrescriptionWidget({required this.petUid, required this.patientUid});
 
   @override
   _AddPrescriptionWidgetState createState() => _AddPrescriptionWidgetState();
@@ -24,6 +26,7 @@ class _AddPrescriptionWidgetState extends State<AddPrescriptionWidget> {
       DateFormat('yyyy-MM-dd h:mm:ss a').format(DateTime.now());
   String msg = "Prescription added";
   bool isSuccess = false;
+  final PatientService patientService = PatientService();
 
   void _addPrescription() async {
     if (_formKey.currentState!.validate()) {
@@ -40,7 +43,7 @@ class _AddPrescriptionWidgetState extends State<AddPrescriptionWidget> {
             petUid: widget.petUid,
             doctorUid: _authService.uid!, // Replace with actual doctor UID
             prescriptionDate: formattedDate);
-
+        await patientService.updateHasPrescription(widget.patientUid, true);
         setState(() {
           _addingPrescription = false;
           isSuccess = true;

@@ -1,10 +1,12 @@
-import 'dart:typed_data';
+import 'dart:math';
 
 import 'package:animalcare/models/pet.dart';
 import 'package:animalcare/services/appointment_service.dart';
 import 'package:animalcare/services/patient_service.dart';
+import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 
 class PetService {
   final String uid;
@@ -29,7 +31,9 @@ class PetService {
 
       return downloadUrl;
     } catch (e) {
-      print('Error uploading image: $e');
+      if (kDebugMode) {
+        print('Error uploading image: $e');
+      }
       rethrow;
     }
   }
@@ -45,17 +49,17 @@ class PetService {
         return "Pet Name";
       }
     } catch (e) {
-      print("Error getting pet name by UID: $e");
+      if (kDebugMode) {
+        print("Error getting pet name by UID: $e");
+      }
       return e.toString();
     }
   }
 
   Future<PetModel?> getPet(String petId) async {
     try {
-      // Fetch the document for the specified petId
       DocumentSnapshot documentSnapshot = await petCollection.doc(petId).get();
 
-      // Check if the document exists
       if (documentSnapshot.exists) {
         Map<String, dynamic> data =
             documentSnapshot.data() as Map<String, dynamic>;
@@ -71,12 +75,13 @@ class PetService {
           ownerUid: data['ownerUid'] ?? '',
         );
       } else {
-        // If the document does not exist, return null
         return null;
       }
     } catch (e) {
       // Handle errors
-      print('Error getting pet by ID: $e');
+      if (kDebugMode) {
+        print('Error getting pet by ID: $e');
+      }
       rethrow; // Rethrow the exception for higher-level handling
     }
   }
@@ -89,20 +94,17 @@ class PetService {
     required Uint8List? photoFile,
   }) async {
     try {
-      // Upload the photo and get the download URL
       String photoUrl = await _uploadImage(photoFile!);
 
-      // Add pet to Firestore with photo URL and user's UID
       DocumentReference petDocRef = await petCollection.add({
         'name': name,
         'species': species,
         'age': age,
         'breed': breed,
         'photoUrl': photoUrl,
-        'ownerUid': uid, // Include the user's UID
+        'ownerUid': uid,
       });
 
-      // Return the created PetModel
       return PetModel(
         id: petDocRef.id,
         name: name,
@@ -114,18 +116,18 @@ class PetService {
       );
     } catch (e) {
       // Handle errors
-      print('Error adding pet: $e');
+      if (kDebugMode) {
+        print('Error adding pet: $e');
+      }
       rethrow; // Rethrow the exception for higher-level handling
     }
   }
 
   Future<List<PetModel>> getPetsForUser() async {
     try {
-      // Fetch the documents from the user's pet collection
       QuerySnapshot querySnapshot =
           await petCollection.where('ownerUid', isEqualTo: uid).get();
 
-      // Convert the documents to PetModel objects
       List<PetModel> pets = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return PetModel(
@@ -141,19 +143,18 @@ class PetService {
 
       return pets;
     } catch (e) {
-      // Handle errors
-      print('Error getting pets for user: $e');
-      rethrow; // Rethrow the exception for higher-level handling
+      if (kDebugMode) {
+        print('Error getting pets for user: $e');
+      }
+      rethrow;
     }
   }
 
   Future<List<PetModel>> getPetByUid(String petUid) async {
     try {
-      // Fetch the documents from the user's pet collection
       QuerySnapshot querySnapshot =
           await petCollection.where('ownerUid', isEqualTo: petUid).get();
 
-      // Convert the documents to PetModel objects
       List<PetModel> pets = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         return PetModel(
@@ -169,9 +170,10 @@ class PetService {
 
       return pets;
     } catch (e) {
-      // Handle errors
-      print('Error getting pets for user: $e');
-      rethrow; // Rethrow the exception for higher-level handling
+      if (kDebugMode) {
+        print('Error getting pets for user: $e');
+      }
+      rethrow;
     }
   }
 
@@ -184,10 +186,8 @@ class PetService {
     required Uint8List? newPhotoFile,
   }) async {
     try {
-      // Upload the new photo and get the download URL
       String newPhotoUrl = await _uploadImage(newPhotoFile!);
 
-      // Update the pet data in Firestore with the new information
       await petCollection.doc(petId).update({
         'name': name,
         'species': species,
@@ -196,9 +196,10 @@ class PetService {
         'photoUrl': newPhotoUrl,
       });
     } catch (e) {
-      // Handle errors
-      print('Error editing pet: $e');
-      rethrow; // Rethrow the exception for higher-level handling
+      if (kDebugMode) {
+        print('Error editing pet: $e');
+      }
+      rethrow;
     }
   }
 
@@ -209,7 +210,6 @@ class PetService {
         .get();
 
     if (querySnapshot.docs.isNotEmpty) {
-      // Assuming petUid is unique, we'll only have one result
       return querySnapshot.docs.first.id;
     } else {
       return null;
@@ -217,16 +217,78 @@ class PetService {
   }
 
   Future<String> removePet(String petId) async {
-    var getId = await getPetId(petId);
     try {
-      // Delete the pet from Firestore
       await petCollection.doc(petId).delete();
 
       return "Pet Successfuly deleted";
     } catch (e) {
-      // Handle errors
       return e.toString();
-// Rethrow the exception for higher-level handling
     }
   }
+
+  Future<List<charts.Series<SpeciesCount, String>>>
+      getSpeciesCountsChart() async {
+    try {
+      QuerySnapshot querySnapshot = await petCollection.get();
+
+      Map<String, int> speciesCounts = {};
+      for (var doc in querySnapshot.docs) {
+        String species = doc.get('species') ?? 'Unknown';
+        speciesCounts.update(species, (value) => value + 1, ifAbsent: () => 1);
+      }
+
+      List<SpeciesCount> data = speciesCounts.entries.map((entry) {
+        return SpeciesCount(entry.key, entry.value);
+      }).toList();
+
+      return [
+        charts.Series<SpeciesCount, String>(
+          id: 'Species Counts',
+          domainFn: (SpeciesCount count, _) => count.species,
+          measureFn: (SpeciesCount count, _) => count.count,
+          data: data,
+          colorFn: (_, __) =>
+              _getRandomColor(), // Assign random color to each bar
+          labelAccessorFn: (SpeciesCount count, _) => '${count.count}',
+        )
+      ];
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching species counts: $e');
+      }
+      rethrow;
+    }
+  }
+
+  // Function to generate a random color
+  charts.Color _getRandomColor() {
+    final random = Random();
+    return charts.Color(
+      r: random.nextInt(256),
+      g: random.nextInt(256),
+      b: random.nextInt(256),
+    );
+  }
+
+  Future<int> getTotalPetCount() async {
+    try {
+      QuerySnapshot querySnapshot = await petCollection.get();
+      if (kDebugMode) {
+        print(querySnapshot.size);
+      }
+      return querySnapshot.size;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error fetching total pet count: $e');
+      }
+      rethrow;
+    }
+  }
+}
+
+class SpeciesCount {
+  final String species;
+  final int count;
+
+  SpeciesCount(this.species, this.count);
 }

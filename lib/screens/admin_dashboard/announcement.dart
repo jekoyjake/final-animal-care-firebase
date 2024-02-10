@@ -1,10 +1,15 @@
+import 'package:animalcare/screens/wrapper.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:animalcare/models/announcement.dart';
 import 'package:animalcare/services/announcement_service.dart';
 import 'package:animalcare/services/auth_service.dart';
 
 class AnnouncementAdmin extends StatefulWidget {
+  const AnnouncementAdmin({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _AnnouncementAdminState createState() => _AnnouncementAdminState();
 }
 
@@ -20,17 +25,13 @@ class _AnnouncementAdminState extends State<AnnouncementAdmin> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.home),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.notifications),
-            onPressed: () {},
-          ),
-          IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
               _authService.signOut();
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const Wrapper()),
+              );
             },
           ),
         ],
@@ -39,11 +40,11 @@ class _AnnouncementAdminState extends State<AnnouncementAdmin> {
         future: _announcementService.getAllAnnouncements(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No announcements found.'));
+            return const Center(child: Text('No announcements found.'));
           } else {
             List<Announcement> announcements = snapshot.data!;
 
@@ -53,33 +54,32 @@ class _AnnouncementAdminState extends State<AnnouncementAdmin> {
                 Announcement announcement = announcements[index];
                 return Card(
                   elevation: 3,
-                  margin: EdgeInsets.all(8.0),
+                  margin: const EdgeInsets.all(8.0),
                   child: ListTile(
+                    leading: const Icon(Icons.newspaper),
                     title: Text(
                       announcement.title,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     subtitle: Text(
                       announcement.content,
-                      style: TextStyle(fontSize: 16),
+                      style: const TextStyle(fontSize: 16),
                     ),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         IconButton(
-                          icon: Icon(Icons.edit),
+                          icon: const Icon(Icons.edit),
                           onPressed: () {
-                            // Navigate to the edit screen
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => EditAnnouncementWidget(
                                   announcement: announcement,
                                   onUpdate: () {
-                                    // Refresh the list after updating
                                     setState(() {});
                                   },
                                 ),
@@ -88,9 +88,8 @@ class _AnnouncementAdminState extends State<AnnouncementAdmin> {
                           },
                         ),
                         IconButton(
-                          icon: Icon(Icons.delete),
+                          icon: const Icon(Icons.delete),
                           onPressed: () async {
-                            // Delete the announcement and refresh the list
                             await _announcementService
                                 .deleteAnnouncement(announcement.uid);
                             setState(() {});
@@ -107,20 +106,18 @@ class _AnnouncementAdminState extends State<AnnouncementAdmin> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to the add screen
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (context) => AddAnnouncementWidget(
                 onAdd: () {
-                  // Refresh the list after adding
                   setState(() {});
                 },
               ),
             ),
           );
         },
-        child: Icon(Icons.add),
+        child: const Icon(Icons.add),
       ),
     );
   }
@@ -129,7 +126,7 @@ class _AnnouncementAdminState extends State<AnnouncementAdmin> {
 class AddAnnouncementWidget extends StatefulWidget {
   final Function onAdd;
 
-  AddAnnouncementWidget({required this.onAdd});
+  const AddAnnouncementWidget({super.key, required this.onAdd});
 
   @override
   State<AddAnnouncementWidget> createState() => _AddAnnouncementWidgetState();
@@ -140,50 +137,52 @@ class _AddAnnouncementWidgetState extends State<AddAnnouncementWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final AuthService _authService = AuthService();
-    final _formKey = GlobalKey<FormState>();
-    final TextEditingController _titleController = TextEditingController();
-    final TextEditingController _contentController = TextEditingController();
+    final AuthService authService = AuthService();
+    final formKey = GlobalKey<FormState>();
+    final TextEditingController titleController = TextEditingController();
+    final TextEditingController contentController = TextEditingController();
     bool isLoading = false;
-    void _submit() async {
+    void submit() async {
       setState(() {
         isLoading = true;
       });
-      if (_formKey.currentState!.validate()) {
+      if (formKey.currentState!.validate()) {
         try {
           await _announcementService.addAnnouncement(
-            ownerUid: _authService.uid!,
-            title: _titleController.text,
-            content: _contentController.text,
+            ownerUid: authService.uid!,
+            title: titleController.text,
+            content: contentController.text,
           );
           widget.onAdd();
           setState(() {
             isLoading = false;
-            _titleController.clear();
-            _contentController.clear();
+            titleController.clear();
+            contentController.clear();
           });
+          // ignore: use_build_context_synchronously
           Navigator.pop(context);
         } catch (e) {
-          // Handle errors
-          print('Error adding doctor: $e');
+          if (kDebugMode) {
+            print('Error adding doctor: $e');
+          }
         }
       }
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Add Announcement'),
+        title: const Text('Add Announcement'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(labelText: 'Title'),
+                controller: titleController,
+                decoration: const InputDecoration(labelText: 'Title'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please add title';
@@ -191,10 +190,10 @@ class _AddAnnouncementWidgetState extends State<AddAnnouncementWidget> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               TextFormField(
-                controller: _contentController,
-                decoration: InputDecoration(labelText: 'Content'),
+                controller: contentController,
+                decoration: const InputDecoration(labelText: 'Content'),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
                     return 'Please add content';
@@ -202,14 +201,14 @@ class _AddAnnouncementWidgetState extends State<AddAnnouncementWidget> {
                   return null;
                 },
               ),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () async {
                   // Add the announcement and invoke the callback
-                  _submit();
+                  submit();
                 },
                 child: isLoading
-                    ? CircularProgressIndicator()
+                    ? const CircularProgressIndicator()
                     : const Text('Add Announcement'),
               ),
             ],
@@ -224,9 +223,11 @@ class EditAnnouncementWidget extends StatefulWidget {
   final Announcement announcement;
   final Function onUpdate;
 
-  EditAnnouncementWidget({required this.announcement, required this.onUpdate});
+  const EditAnnouncementWidget(
+      {super.key, required this.announcement, required this.onUpdate});
 
   @override
+  // ignore: library_private_types_in_public_api
   _EditAnnouncementWidgetState createState() => _EditAnnouncementWidgetState();
 }
 
@@ -247,7 +248,7 @@ class _EditAnnouncementWidgetState extends State<EditAnnouncementWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Announcement'),
+        title: const Text('Edit Announcement'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -256,23 +257,20 @@ class _EditAnnouncementWidgetState extends State<EditAnnouncementWidget> {
           children: [
             TextField(
               controller: _titleController,
-              decoration: InputDecoration(labelText: 'Title'),
+              decoration: const InputDecoration(labelText: 'Title'),
               onChanged: (value) {
                 // Handle title change
               },
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: _contentController,
-              decoration: InputDecoration(labelText: 'Content'),
-              onChanged: (value) {
-                // Handle content change
-              },
+              decoration: const InputDecoration(labelText: 'Content'),
+              onChanged: (value) {},
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () async {
-                // Update the announcement and invoke the callback
                 await _announcementService.updateAnnouncement(
                   announcementId: widget.announcement.uid,
                   ownerUid: widget.announcement.ownerUid,
@@ -280,9 +278,10 @@ class _EditAnnouncementWidgetState extends State<EditAnnouncementWidget> {
                   content: _contentController.text,
                 );
                 widget.onUpdate();
+                // ignore: use_build_context_synchronously
                 Navigator.pop(context);
               },
-              child: Text('Update Announcement'),
+              child: const Text('Update Announcement'),
             ),
           ],
         ),

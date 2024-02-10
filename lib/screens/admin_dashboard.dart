@@ -1,4 +1,5 @@
 import 'package:animalcare/reusable_widget/admin_drawer.dart';
+import 'package:animalcare/screens/admin_dashboard/admin_dashboard.dart';
 import 'package:animalcare/screens/admin_dashboard/announcement.dart';
 import 'package:animalcare/screens/admin_dashboard/doctor_dashboard.dart';
 import 'package:animalcare/screens/admin_dashboard/staff_dashboard.dart';
@@ -17,10 +18,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
   Widget _buildSelectedWidget() {
     switch (selected) {
       case 0:
-        return const DoctorDashboardAdmin();
+        return const AdminMain();
       case 1:
-        return const StaffAdmin();
+        return const DoctorDashboardAdmin();
       case 2:
+        return const StaffAdmin();
+      case 3:
         return AnnouncementAdmin();
       default:
         return Container();

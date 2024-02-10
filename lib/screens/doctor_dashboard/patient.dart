@@ -3,6 +3,7 @@ import 'package:animalcare/models/patient.dart';
 import 'package:animalcare/screens/doctor_dashboard/add_prescription.dart';
 
 import 'package:animalcare/screens/wrapper.dart';
+import 'package:animalcare/services/appointment_service.dart';
 
 import 'package:animalcare/services/auth_service.dart';
 import 'package:animalcare/services/notif.dart';
@@ -58,7 +59,7 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
     return date;
   }
 
-  Future<void> _selectDateAppointment(BuildContext context) async {
+  Future<void> selectDateAppointment(BuildContext context) async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
       initialDate: _selectedDateAppointment,
@@ -126,28 +127,40 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
                 .format(patient.appointmentDate)),
           ),
           DataCell(
-            Row(
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AddPrescriptionWidget(
-                          petUid: patient.petUid,
+            patient.hasPrescription
+                ? const Icon(
+                    Icons.check,
+                    size: 30,
+                    color: Colors.green, // Customize the color to green
+                  )
+                : ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AddPrescriptionWidget(
+                            petUid: patient.petUid,
+                            patientUid: patient.uId,
+                          ),
                         ),
-                      ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                    ),
+                    child: const Text(
+                      'Add Prescription',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                  child: const Text(
-                    'Add Prescription',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-                ElevatedButton(
+          ),
+          DataCell(patient.isAppointed
+              ? const Icon(
+                  Icons.check,
+                  size: 30,
+                  color: Colors.orange, // Customize the color to green
+                )
+              : ElevatedButton(
                   onPressed: () async {
                     _newAppointment(patient);
                   },
@@ -158,10 +171,7 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
                     'Make New Appointment',
                     style: TextStyle(color: Colors.white),
                   ),
-                )
-              ],
-            ),
-          ),
+                )),
         ],
       );
     }).toList();
@@ -326,7 +336,7 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Text('No appointments found');
+                    return const Text('No patients found');
                   } else {
                     List<PatientModel> patient = snapshot.data!;
 
@@ -354,7 +364,13 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
                           ),
                           DataColumn(
                             label: Text(
-                              'Options',
+                              'Prescription',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ),
+                          DataColumn(
+                            label: Text(
+                              'Appointment',
                               style: TextStyle(fontSize: 20),
                             ),
                           ),
@@ -372,6 +388,17 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
     );
   }
 
+  void _submitNewAppointment(String petId, String uId) async {
+    final AppointmentService appointmentService = AppointmentService();
+    final PatientService patientService = PatientService();
+    try {
+      await appointmentService.addAppointment(_selectedDateAppointment, petId);
+      await patientService.updateIsAppointed(uId, true);
+    } catch (e) {
+      print(e.toString());
+    }
+  }
+
   void _newAppointment(PatientModel patient) async {
     final AuthService authService = AuthService();
     final UserService userService = UserService(uid: authService.uid!);
@@ -379,107 +406,82 @@ class _PatientDashboardDoctorState extends State<PatientDashboardDoctor> {
     String ownerName = await userService.getUserDetailsById(patient.userUid);
     String petName = await petService.getPetNameByUid(patient.petUid);
     var petSpecies = await petService.getPet(patient.petUid);
+
     // ignore: use_build_context_synchronously
     showDialog(
         context: context,
         builder: (BuildContext contex) {
           return AlertDialog(
             title: const Text("Create new appointment"),
-            content: Column(children: [
-              Text("Owner Name: $ownerName"),
-              Text("Pet Name: $petName"),
-              Text("Pet Species: ${petSpecies!.species}"),
-              Theme(
-                data: ThemeData.dark(),
-                child: FormBuilderDateTimePicker(
-                  name: 'date_and_time',
-                  inputType: InputType.both,
-                  format: DateFormat('yyyy-MM-dd HH:mm:ss'),
-                  decoration: const InputDecoration(
-                    labelText: 'Click here to select time and date',
-                    labelStyle: TextStyle(color: Colors.black),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black),
+            content: Column(
+              children: [
+                Text("Owner Name: $ownerName"),
+                Text("Pet Name: $petName"),
+                Text("Pet Species: ${petSpecies!.species}"),
+                Theme(
+                  data: ThemeData.dark(),
+                  child: FormBuilderDateTimePicker(
+                    name: 'date_and_time',
+                    inputType: InputType.both,
+                    format: DateFormat('yyyy-MM-dd HH:mm:ss'),
+                    decoration: const InputDecoration(
+                      labelText: 'Click here to select time and date',
+                      labelStyle: TextStyle(color: Colors.black),
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black),
+                      ),
+                      prefixIcon:
+                          Icon(Icons.calendar_today, color: Colors.black),
                     ),
-                    prefixIcon: Icon(Icons.calendar_today, color: Colors.black),
-                  ),
-                  style: const TextStyle(color: Colors.black),
-                  onChanged: (DateTime? newDate) {
-                    if (newDate != null) {
-                      final time = TimeOfDay.fromDateTime(newDate);
-                      const start = TimeOfDay(hour: 8, minute: 0);
-                      const end = TimeOfDay(hour: 17, minute: 0);
+                    style: const TextStyle(color: Colors.black),
+                    onChanged: (DateTime? newDatee) {
+                      if (newDatee != null) {
+                        final time = TimeOfDay.fromDateTime(newDatee);
+                        const start = TimeOfDay(hour: 8, minute: 0);
+                        const end = TimeOfDay(hour: 17, minute: 0);
 
-                      final selectedMinutes = time.hour * 60 + time.minute;
-                      final startMinutes = start.hour * 60 + start.minute;
-                      final endMinutes = end.hour * 60 + end.minute;
+                        final selectedMinutes = time.hour * 60 + time.minute;
+                        final startMinutes = start.hour * 60 + start.minute;
+                        final endMinutes = end.hour * 60 + end.minute;
 
-                      if (selectedMinutes < startMinutes ||
-                          selectedMinutes > endMinutes) {
-                        setState(() {
-                          hasError = true;
-                        });
-                      } else {
-                        setState(() {
-                          _selectedDateAppointment = newDate;
-                          hasError = false;
-                        });
+                        if (selectedMinutes < startMinutes ||
+                            selectedMinutes > endMinutes) {
+                          setState(() {
+                            hasError = true;
+                            print(hasError);
+                            print(msg);
+                          });
+                        } else {
+                          setState(() {
+                            _selectedDateAppointment = newDatee;
+                            print(_selectedDateAppointment);
+                            print(msg);
+                            hasError = false;
+                          });
+                        }
                       }
-                    }
-                  },
-                  initialDate: getNextSelectableWeekday(DateTime.now()),
-                  firstDate: getNextSelectableWeekday(DateTime.now()),
-                  lastDate: getNextSelectableWeekday(
-                      DateTime(DateTime.now().year + 2)),
-                  selectableDayPredicate: (DateTime date) {
-                    return date.weekday != DateTime.saturday &&
-                        date.weekday != DateTime.sunday;
-                  },
+                    },
+                    initialDate: getNextSelectableWeekday(DateTime.now()),
+                    firstDate: getNextSelectableWeekday(DateTime.now()),
+                    lastDate: getNextSelectableWeekday(
+                        DateTime(DateTime.now().year + 2)),
+                    selectableDayPredicate: (DateTime date) {
+                      return date.weekday != DateTime.saturday &&
+                          date.weekday != DateTime.sunday;
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  const Text(
-                    "Selected Date:",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  const Icon(
-                    Icons.calendar_today,
-                    color: Colors.black, // Customize the icon color
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    // ignore: unnecessary_null_comparison
-                    _selectedDateAppointment != null
-                        ? DateFormat('yyyy-MM-dd')
-                            .format(_selectedDateAppointment)
-                        : 'No date selected',
-                    style: const TextStyle(fontSize: 18, color: Colors.black),
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  const Text(
-                    "Selected Time:",
-                    style: TextStyle(color: Colors.black),
-                  ),
-                  const Icon(
-                    Icons.watch,
-                    color: Colors.black, // Customize the icon color
-                  ),
-                  Text(
-                    // ignore: unnecessary_null_comparison
-                    _selectedDateAppointment != null
-                        ? DateFormat('hh:mm:ss a')
-                            .format(_selectedDateAppointment)
-                        : 'No time selected',
-                    style: const TextStyle(fontSize: 18, color: Colors.black),
-                  ),
-                ],
-              )
-            ]),
+                const SizedBox(height: 20),
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                  onPressed: () {
+                    _submitNewAppointment(patient.petUid, patient.uId);
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text("Submit"))
+            ],
           );
         });
   }
